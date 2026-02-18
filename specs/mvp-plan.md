@@ -33,7 +33,7 @@ Building "VidPare," a native macOS video trimmer to escape the limitations of we
 
 ## Project Structure
 
-```
+```text
 vidpare/
 ├── Package.swift                          # Swift Package manifest (macOS 14+, SwiftUI lifecycle)
 ├── Sources/
@@ -104,7 +104,7 @@ vidpare/
 - Estimated output size calculation:
   - Passthrough: `(trimDuration / totalDuration) * fileSize`
   - Re-encode: estimate from target bitrate * duration
-- **Key API**: `AVAssetExportSession`, `CMTimeRange`, `CMTimeRangeFromTimeToTime`
+- **Key API**: `AVAssetExportSession`, `CMTimeRange(start:end:)` or `CMTimeRange(start:duration:)`
 
 ### Step 6: Export UI
 - `ExportSheet` presented as a sheet/modal
