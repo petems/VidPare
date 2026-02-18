@@ -23,7 +23,7 @@ Web-based video trimming tools impose file size limits, require uploads, and rel
 
 ## Architecture
 
-```
+```text
 SwiftUI Shell (views, timeline, export UI)
     |
 VideoEngine (AVAsset, AVMutableComposition, AVAssetExportSession)
@@ -45,4 +45,4 @@ The app targets macOS 14+ with local development signing.
 
 ## License
 
-TBD
+[MIT](LICENSE)
