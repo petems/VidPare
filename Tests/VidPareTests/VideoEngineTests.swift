@@ -307,9 +307,9 @@ final class VideoEngineTests: XCTestCase {
             sourceIsHEVC: false,
             supportMatrix: supportMatrix(
                 overrides: [
-                    (.passthrough, .mp4H264, .supported),
-                    (.high, .mp4H264, .supported),
-                    (.high, .mp4HEVC, .supported)
+                    SupportOverride(quality: .passthrough, format: .mp4H264, support: .supported),
+                    SupportOverride(quality: .high, format: .mp4H264, support: .supported),
+                    SupportOverride(quality: .high, format: .mp4HEVC, support: .supported)
                 ]
             )
         )
@@ -330,8 +330,8 @@ final class VideoEngineTests: XCTestCase {
             sourceIsHEVC: true,
             supportMatrix: supportMatrix(
                 overrides: [
-                    (.high, .mp4H264, .supported),
-                    (.high, .movH264, .supported)
+                    SupportOverride(quality: .high, format: .mp4H264, support: .supported),
+                    SupportOverride(quality: .high, format: .movH264, support: .supported)
                 ]
             )
         )
@@ -351,7 +351,7 @@ final class VideoEngineTests: XCTestCase {
             sourceIsHEVC: false,
             supportMatrix: supportMatrix(
                 overrides: [
-                    (.medium, .movH264, .supported)
+                    SupportOverride(quality: .medium, format: .movH264, support: .supported)
                 ]
             )
         )
