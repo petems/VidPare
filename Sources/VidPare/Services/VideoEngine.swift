@@ -87,9 +87,11 @@ final class VideoEngine {
     ) -> Int64 {
         let totalSeconds = CMTimeGetSeconds(videoDuration)
         let trimSeconds = CMTimeGetSeconds(trimRange.duration)
-        guard totalSeconds > 0 else { return 0 }
+        guard totalSeconds > 0, totalSeconds.isFinite else { return 0 }
 
-        let ratio = trimSeconds / totalSeconds
+        let rawRatio = trimSeconds / totalSeconds
+        guard rawRatio.isFinite else { return 0 }
+        let ratio = min(max(rawRatio, 0.0), 1.0)
 
         switch quality {
         case .passthrough:
