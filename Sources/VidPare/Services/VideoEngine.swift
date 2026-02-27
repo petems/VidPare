@@ -1,6 +1,7 @@
 import AVFoundation
 import Observation
 
+@MainActor
 @Observable
 final class VideoEngine {
     private(set) var isExporting = false
@@ -14,7 +15,7 @@ final class VideoEngine {
         let fileSize: Int64
     }
 
-    static func effectiveQuality(
+    nonisolated static func effectiveQuality(
         format: ExportFormat,
         quality: QualityPreset,
         sourceIsHEVC: Bool
@@ -95,7 +96,7 @@ final class VideoEngine {
     }
 
     /// Estimate output file size in bytes
-    static func estimateOutputSize(
+    nonisolated static func estimateOutputSize(
         fileSize: Int64,
         videoDuration: CMTime,
         trimRange: CMTimeRange,
@@ -124,8 +125,8 @@ final class VideoEngine {
     // MARK: - Private
 
     private func startProgressPolling(session: AVAssetExportSession) {
-        DispatchQueue.main.async { [weak self] in
-            self?.progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
                 let newProgress = Double(session.progress)
                 if newProgress >= (self?.progress ?? 0) {
                     self?.progress = newProgress
@@ -135,10 +136,8 @@ final class VideoEngine {
     }
 
     private func stopProgressPolling() {
-        DispatchQueue.main.async { [weak self] in
-            self?.progressTimer?.invalidate()
-            self?.progressTimer = nil
-        }
+        progressTimer?.invalidate()
+        progressTimer = nil
     }
 }
 

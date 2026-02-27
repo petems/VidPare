@@ -236,12 +236,12 @@ final class VideoEngineTests: XCTestCase {
 
     // MARK: - VideoEngine state
 
-    func testVideoEngineIsNotExportingByDefault() {
+    @MainActor func testVideoEngineIsNotExportingByDefault() {
         let engine = VideoEngine()
         XCTAssertFalse(engine.isExporting)
     }
 
-    func testVideoEngineProgressStartsAtZero() {
+    @MainActor func testVideoEngineProgressStartsAtZero() {
         let engine = VideoEngine()
         XCTAssertEqual(engine.progress, 0)
     }
