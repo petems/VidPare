@@ -21,23 +21,27 @@ disabled_rules:
 
 # Rules enabled beyond the default set (opt-in)
 opt_in_rules:
-  - empty_count                  # prefer isEmpty over .count == 0
-  - empty_string                 # prefer isEmpty over == ""
-  - sorted_imports               # keep import statements sorted
-  - operator_usage_whitespace    # consistent spacing around operators
   - closure_spacing              # spaces inside closure braces
   - collection_alignment         # align collection literal elements
   - contains_over_first_not_nil  # prefer contains over first != nil
   - discouraged_optional_boolean # avoid Bool? when Bool suffices
+  - empty_count                  # prefer isEmpty over .count == 0
+  - empty_string                 # prefer isEmpty over == ""
   - explicit_init                # .init() preferred over Type()
   - fallthrough                  # explicit fallthrough is intentional
+  - fatal_error_message          # require fatalError message
   - first_where                  # prefer first(where:) over filter().first
   - legacy_random                # use Swift random APIs, not arc4random
   - literal_expression_end_indentation
   - multiline_arguments          # consistent multiline argument formatting
   - multiline_function_chains
   - multiline_parameters
+  - operator_usage_whitespace    # consistent spacing around operators
+  - overridden_super_call        # require super calls where needed
   - redundant_nil_coalescing     # remove ?? nil
+  - redundant_string_enum_value  # avoid repeated string raw value
+  - sorted_imports               # keep import statements sorted
+  - trailing_comma               # cleaner multiline literal diffs
   - unavailable_function         # mark unavailable code clearly
 
 # ─── Thresholds ────────────────────────────────────────────────────────────
