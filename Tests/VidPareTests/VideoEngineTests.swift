@@ -302,6 +302,15 @@ final class VideoEngineTests: XCTestCase {
     }
 
     func testVideoDocumentRejectsNoVideoTrack() async throws {
+        let sayPath = "/usr/bin/say"
+        let afconvertPath = "/usr/bin/afconvert"
+        guard FileManager.default.isExecutableFile(atPath: sayPath) else {
+            throw XCTSkip("Skipping: \(sayPath) is not available on this runner.")
+        }
+        guard FileManager.default.isExecutableFile(atPath: afconvertPath) else {
+            throw XCTSkip("Skipping: \(afconvertPath) is not available on this runner.")
+        }
+
         let uid = UUID().uuidString
         let m4aURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("test_audio_\(uid).m4a")
@@ -314,19 +323,23 @@ final class VideoEngineTests: XCTestCase {
 
         // Create a valid audio-only M4A via macOS `say` command
         let sayProcess = Process()
-        sayProcess.executableURL = URL(fileURLWithPath: "/usr/bin/say")
+        sayProcess.executableURL = URL(fileURLWithPath: sayPath)
         sayProcess.arguments = ["-o", m4aURL.path, "--data-format=aac", "test"]
         try sayProcess.run()
         sayProcess.waitUntilExit()
-        XCTAssertEqual(sayProcess.terminationStatus, 0, "say command failed")
+        guard sayProcess.terminationStatus == 0 else {
+            throw XCTSkip("Skipping: `say` failed with status \(sayProcess.terminationStatus).")
+        }
 
         // Convert to MP4 container via afconvert so VideoDocument.canOpen passes
         let convertProcess = Process()
-        convertProcess.executableURL = URL(fileURLWithPath: "/usr/bin/afconvert")
+        convertProcess.executableURL = URL(fileURLWithPath: afconvertPath)
         convertProcess.arguments = [m4aURL.path, mp4URL.path, "-d", "aac", "-f", "mp4f"]
         try convertProcess.run()
         convertProcess.waitUntilExit()
-        XCTAssertEqual(convertProcess.terminationStatus, 0, "afconvert command failed")
+        guard convertProcess.terminationStatus == 0 else {
+            throw XCTSkip("Skipping: `afconvert` failed with status \(convertProcess.terminationStatus).")
+        }
 
         let doc = VideoDocument(url: mp4URL)
         do {

@@ -33,6 +33,12 @@ final class VideoEngine {
         sourceURL: URL? = nil
     ) async throws -> ExportResult {
         let effectiveQuality = Self.effectiveQuality(format: format, quality: quality, sourceIsHEVC: sourceIsHEVC)
+        let hadExistingOutput = FileManager.default.fileExists(atPath: outputURL.path)
+        let cleanupPartialOutput: () -> Void = {
+            // Never delete a file that existed before this export attempt.
+            guard !hadExistingOutput else { return }
+            try? FileManager.default.removeItem(at: outputURL)
+        }
 
         let scopedAccess = sourceURL?.startAccessingSecurityScopedResource() ?? false
         defer {
@@ -55,7 +61,7 @@ final class VideoEngine {
         self.isExporting = true
         self.progress = 0
 
-        startProgressPolling(session: session)
+        startProgressPolling()
 
         let startDate = Date()
 
@@ -66,7 +72,7 @@ final class VideoEngine {
 
             guard session.status == .completed else {
                 self.isExporting = false
-                try? FileManager.default.removeItem(at: outputURL)
+                cleanupPartialOutput()
                 if session.status == .cancelled {
                     throw ExportError.cancelled
                 }
@@ -84,7 +90,7 @@ final class VideoEngine {
         } catch {
             stopProgressPolling()
             self.isExporting = false
-            try? FileManager.default.removeItem(at: outputURL)
+            cleanupPartialOutput()
             throw error
         }
     }
@@ -124,12 +130,13 @@ final class VideoEngine {
 
     // MARK: - Private
 
-    private func startProgressPolling(session: AVAssetExportSession) {
+    private func startProgressPolling() {
         progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
-                let newProgress = Double(session.progress)
-                if newProgress >= (self?.progress ?? 0) {
-                    self?.progress = newProgress
+                guard let self else { return }
+                let newProgress = Double(self.exportSession?.progress ?? 0)
+                if newProgress >= self.progress {
+                    self.progress = newProgress
                 }
             }
         }

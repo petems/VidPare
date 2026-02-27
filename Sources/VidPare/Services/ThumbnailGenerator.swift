@@ -22,28 +22,35 @@ final class ThumbnailGenerator {
         let clampedCount = max(10, min(count, 60))
         let interval = totalSeconds / Double(clampedCount)
 
-        let times: [NSValue] = (0..<clampedCount).map { index in
-            let time = CMTime(seconds: Double(index) * interval, preferredTimescale: 600)
-            return NSValue(time: time)
+        let requestedTimes: [NSValue] = (0..<clampedCount).map { index in
+            let requestTime = CMTime(seconds: Double(index) * interval, preferredTimescale: 600)
+            return NSValue(time: requestTime)
         }
 
         return try await withCheckedThrowingContinuation { continuation in
             var images: [Int: NSImage] = [:]
             var completedCount = 0
-            let expectedCount = times.count
+            let expectedCount = requestedTimes.count
+            let stateQueue = DispatchQueue(label: "VidPare.ThumbnailGenerator.State")
 
-            generator.generateCGImagesAsynchronously(forTimes: times) { requestedTime, cgImage, _, result, _ in
-                if let cgImage = cgImage, result == .succeeded {
-                    if let index = times.firstIndex(where: { CMTimeCompare($0.timeValue, requestedTime) == 0 }) {
+            generator.generateCGImagesAsynchronously(forTimes: requestedTimes) { requestedTime, cgImage, _, result, _ in
+                var finishedImages: [NSImage]?
+                stateQueue.sync {
+                    if let cgImage = cgImage, result == .succeeded {
+                        let requestedSeconds = CMTimeGetSeconds(requestedTime)
+                        let rawIndex = interval > 0 ? Int((requestedSeconds / interval).rounded()) : 0
+                        let index = min(max(rawIndex, 0), expectedCount - 1)
                         let nsImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
                         images[index] = nsImage
                     }
-                }
 
-                completedCount += 1
-                if completedCount == expectedCount {
-                    let sorted = (0..<expectedCount).compactMap { images[$0] }
-                    continuation.resume(returning: sorted)
+                    completedCount += 1
+                    if completedCount == expectedCount {
+                        finishedImages = (0..<expectedCount).compactMap { images[$0] }
+                    }
+                }
+                if let finishedImages {
+                    continuation.resume(returning: finishedImages)
                 }
             }
         }
