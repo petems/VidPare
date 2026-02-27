@@ -25,7 +25,7 @@ Building "VidPare," a native macOS video trimmer to escape the limitations of we
 - **Trim**: Single cut — set in-point and out-point
 - **Export formats**: MP4 (H.264), MOV (H.264), MP4 (HEVC/H.265)
 - **Quality presets**: Passthrough (fastest, default), High, Medium, Low
-  - Note: Passthrough preserves the source codec; selecting HEVC format with Passthrough auto-promotes to re-encode
+  - Note: Passthrough preserves the source codec; if the user selects HEVC format, quality auto-promotes from Passthrough to High unless the source is already HEVC. Selecting Passthrough disables the format picker since format is determined by the source codec.
 - **Estimated output size** shown in export dialog
 - **Export location**: User-chosen via save dialog
 
@@ -82,6 +82,7 @@ vidpare/
 - Wire `AVPlayer` to the loaded `AVPlayerItem`
 - `addPeriodicTimeObserver` for syncing playback position to timeline
 - Play/pause toggle, seek to arbitrary time
+- Playback clamps at trim endTime and loops back to startTime via the periodic time observer
 - **Key API**: `AVPlayer`, `AVPlayerLayer`, `seek(to:toleranceBefore:toleranceAfter:)`
 
 ### Step 4: Timeline with Thumbnails
@@ -96,8 +97,7 @@ vidpare/
 
 ### Step 5: Trim & Export Engine
 - `VideoEngine.export()` method with these modes:
-  - **Passthrough**: `AVAssetExportSession` with `AVAssetExportPresetPassthrough`, `timeRange` set to trim region. Nearly instant, no re-encode. Preserves source codec — format picker is disabled (greyed out) when Passthrough is selected.
-  - **Re-encode**: `AVAssetExportSession` with quality presets (`AVAssetExportPresetHighestQuality`, etc.). Format picker (H.264/HEVC) is only enabled in re-encode mode. If user selects HEVC format first, quality auto-promotes from Passthrough to High.
+  - **Export modes:** Quality preset is the primary selector. When **Passthrough** is selected, the format picker is disabled — the output preserves the source codec and container. When any re-encode preset (High, Medium, Low) is selected, the format picker is enabled, allowing the user to choose H.264 or HEVC output. If the user selects HEVC format while quality is set to Passthrough, the quality auto-promotes to High (unless the source codec is already HEVC, in which case Passthrough is kept).
 - Output file type mapping: `.mp4` -> `AVFileType.mp4`, `.mov` -> `AVFileType.mov`
 - Progress tracking via `exportSession.progress` (polled on timer)
 - Cancellation support via `exportSession.cancelExport()`
@@ -126,13 +126,14 @@ vidpare/
 
 - Open MP4, MOV, M4V files via drag-and-drop and file picker
 - Scrub through video using timeline; verify thumbnail strip renders correctly
-- Set in/out trim points; verify playback loops/restricts to trimmed region
+- Set in/out trim points; verify playback respects trim boundaries and loops within the selected region
 - Export with passthrough preset; verify output plays correctly and export completes fast
 - Export with re-encode (H.264 High); verify output plays and is smaller than source
 - Export as HEVC; verify output plays in QuickTime
 - Test with various file sizes (small 10MB clips, large 2GB+ files)
 - Test with H.264 and HEVC source files
 - Attempt to open .mkv or .avi — verify clear error message
+- Start an export, try opening a new file — verify it is blocked with error message
 - Verify estimated output size is shown and roughly accurate after export
 
 ## Important Technical Notes
@@ -142,4 +143,5 @@ vidpare/
 - For passthrough export, trim points snap to keyframes — the UI should communicate this clearly
 - HEVC encoding is significantly slower than H.264 even with hardware acceleration — worth noting in UI
 - `AVAssetExportSession.progress` can be unreliable; poll at ~0.5s intervals and handle non-monotonic values
+- Security-scoped resource access is reference-counted on macOS. Blocking file loading during active exports is the primary protection against concurrent access. As a defensive secondary safeguard, the export method retains an extra security-scope reference to the source URL for the duration of the operation, preventing permission loss if the source file is moved/renamed during export or if other operations attempt to release the scope.
 - The project uses a `Package.swift`-based layout. Open the package directory in Xcode (`File > Open...` on the repo root) to get full Xcode integration including signing, entitlements, and asset catalog support. Alternatively, build from CLI with `swift build`.
