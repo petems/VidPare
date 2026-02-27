@@ -8,9 +8,6 @@ struct TimelineView: View {
     @Bindable var trimState: TrimState
     var onSeek: (CMTime) -> Void
 
-    @State private var isDraggingStart = false
-    @State private var isDraggingEnd = false
-
     private var totalSeconds: Double {
         let s = CMTimeGetSeconds(duration)
         return s.isFinite && s > 0 ? s : 1
@@ -145,7 +142,8 @@ struct TimelineView: View {
     private func xPosition(for time: CMTime, in width: CGFloat) -> CGFloat {
         let seconds = CMTimeGetSeconds(time)
         guard seconds.isFinite else { return 0 }
-        return CGFloat(seconds / totalSeconds) * width
+        let clamped = min(max(seconds, 0), totalSeconds)
+        return CGFloat(clamped / totalSeconds) * width
     }
 }
 
