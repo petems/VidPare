@@ -74,7 +74,6 @@ resource "cloudflare_record" "apex" {
   type    = "CNAME"
   content = cloudflare_pages_project.vidpare.subdomain
   proxied = true
-  ttl     = 1
 }
 
 resource "cloudflare_record" "www" {
@@ -83,5 +82,4 @@ resource "cloudflare_record" "www" {
   type    = "CNAME"
   content = cloudflare_pages_project.vidpare.subdomain
   proxied = true
-  ttl     = 1
 }
