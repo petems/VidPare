@@ -21,10 +21,11 @@ struct ExportSheet: View {
     }
 
     private var effectiveQuality: QualityPreset {
-        if trimState.exportFormat.isHEVC && trimState.qualityPreset.isPassthrough {
-            return .high
-        }
-        return trimState.qualityPreset
+        VideoEngine.effectiveQuality(
+            format: trimState.exportFormat,
+            quality: trimState.qualityPreset,
+            sourceIsHEVC: document.isHEVC
+        )
     }
 
     var body: some View {
@@ -63,12 +64,12 @@ struct ExportSheet: View {
                     Picker("Quality", selection: $trimState.qualityPreset) {
                         ForEach(QualityPreset.allCases) { preset in
                             Text(preset.rawValue).tag(preset)
-                                .disabled(preset.isPassthrough && trimState.exportFormat.isHEVC)
+                                .disabled(preset.isPassthrough && trimState.exportFormat.isHEVC && !document.isHEVC)
                         }
                     }
                     .pickerStyle(.radioGroup)
                     .onChange(of: trimState.exportFormat) { _, newValue in
-                        if newValue.isHEVC && trimState.qualityPreset.isPassthrough {
+                        if newValue.isHEVC && trimState.qualityPreset.isPassthrough && !document.isHEVC {
                             trimState.qualityPreset = .high
                         }
                     }
@@ -167,7 +168,8 @@ struct ExportSheet: View {
                     trimRange: trimState.trimRange,
                     format: trimState.exportFormat,
                     quality: effectiveQuality,
-                    outputURL: url
+                    outputURL: url,
+                    sourceIsHEVC: document.isHEVC
                 )
                 exportResult = result
             } catch is CancellationError {

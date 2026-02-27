@@ -20,6 +20,10 @@ final class VideoDocument {
         "\(Int(naturalSize.width))×\(Int(naturalSize.height))"
     }
 
+    var isHEVC: Bool {
+        codecName == "HEVC (H.265)"
+    }
+
     init(url: URL) {
         self.url = url
         self.asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])

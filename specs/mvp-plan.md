@@ -25,7 +25,7 @@ Building "VidPare," a native macOS video trimmer to escape the limitations of we
 - **Trim**: Single cut — set in-point and out-point
 - **Export formats**: MP4 (H.264), MOV (H.264), MP4 (HEVC/H.265)
 - **Quality presets**: Passthrough (fastest, default), High, Medium, Low
-  - Note: Passthrough preserves the source codec; selecting HEVC format with Passthrough auto-promotes to re-encode
+  - Note: Passthrough preserves the source codec; selecting HEVC format with Passthrough auto-promotes to re-encode unless source is already HEVC
 - **Estimated output size** shown in export dialog
 - **Export location**: User-chosen via save dialog
 
@@ -97,7 +97,7 @@ vidpare/
 ### Step 5: Trim & Export Engine
 - `VideoEngine.export()` method with these modes:
   - **Passthrough**: `AVAssetExportSession` with `AVAssetExportPresetPassthrough`, `timeRange` set to trim region. Nearly instant, no re-encode. Preserves source codec — format picker is disabled (greyed out) when Passthrough is selected.
-  - **Re-encode**: `AVAssetExportSession` with quality presets (`AVAssetExportPresetHighestQuality`, etc.). Format picker (H.264/HEVC) is only enabled in re-encode mode. If user selects HEVC format first, quality auto-promotes from Passthrough to High.
+  - **Re-encode**: `AVAssetExportSession` with quality presets (`AVAssetExportPresetHighestQuality`, etc.). Format picker (H.264/HEVC) is only enabled in re-encode mode. If user selects HEVC format first, quality auto-promotes from Passthrough to High unless source codec is already HEVC.
 - Output file type mapping: `.mp4` -> `AVFileType.mp4`, `.mov` -> `AVFileType.mov`
 - Progress tracking via `exportSession.progress` (polled on timer)
 - Cancellation support via `exportSession.cancelExport()`

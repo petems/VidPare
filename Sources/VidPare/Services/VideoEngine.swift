@@ -14,15 +14,23 @@ final class VideoEngine {
         let fileSize: Int64
     }
 
+    static func effectiveQuality(
+        format: ExportFormat,
+        quality: QualityPreset,
+        sourceIsHEVC: Bool
+    ) -> QualityPreset {
+        (format.isHEVC && quality.isPassthrough && !sourceIsHEVC) ? .high : quality
+    }
+
     func export(
         asset: AVURLAsset,
         trimRange: CMTimeRange,
         format: ExportFormat,
         quality: QualityPreset,
-        outputURL: URL
+        outputURL: URL,
+        sourceIsHEVC: Bool = false
     ) async throws -> ExportResult {
-        // If HEVC is selected with passthrough, auto-promote to high quality re-encode
-        let effectiveQuality = (format.isHEVC && quality.isPassthrough) ? .high : quality
+        let effectiveQuality = Self.effectiveQuality(format: format, quality: quality, sourceIsHEVC: sourceIsHEVC)
 
         let preset = effectiveQuality.exportPreset
 

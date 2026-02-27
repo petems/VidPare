@@ -234,6 +234,28 @@ final class VideoEngineTests: XCTestCase {
         }
     }
 
+    // MARK: - VideoEngine.effectiveQuality
+
+    func testEffectiveQuality_hevcPassthrough_nonHEVCSource() {
+        let result = VideoEngine.effectiveQuality(format: .mp4HEVC, quality: .passthrough, sourceIsHEVC: false)
+        XCTAssertEqual(result, .high)
+    }
+
+    func testEffectiveQuality_hevcPassthrough_hevcSource() {
+        let result = VideoEngine.effectiveQuality(format: .mp4HEVC, quality: .passthrough, sourceIsHEVC: true)
+        XCTAssertEqual(result, .passthrough)
+    }
+
+    func testEffectiveQuality_h264Passthrough() {
+        let result = VideoEngine.effectiveQuality(format: .mp4H264, quality: .passthrough, sourceIsHEVC: false)
+        XCTAssertEqual(result, .passthrough)
+    }
+
+    func testEffectiveQuality_hevcHigh() {
+        let result = VideoEngine.effectiveQuality(format: .mp4HEVC, quality: .high, sourceIsHEVC: false)
+        XCTAssertEqual(result, .high)
+    }
+
     // MARK: - TrimState.isAtOrPastEnd
 
     func testIsAtOrPastEnd_beforeEnd() {
