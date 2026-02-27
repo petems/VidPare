@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
@@ -36,7 +36,7 @@ jobs:
           xcodebuild -version
 
       - name: Cache Homebrew packages
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: ~/Library/Caches/Homebrew
           key: ${{ runner.os }}-brew-swiftlint-${{ hashFiles('.swiftlint.yml') }}
@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Select Xcode
         run: sudo xcode-select -s ${{ matrix.xcode }}
@@ -79,7 +79,7 @@ jobs:
           uname -m
 
       - name: Cache Swift build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: .build
           key: ${{ runner.os }}-${{ matrix.macos }}-spm-${{ hashFiles('Package.swift') }}-${{ github.sha }}
@@ -130,7 +130,7 @@ jobs:
       - name: Upload coverage to Codecov
         # Only upload from one matrix leg to avoid duplicate reports
         if: matrix.macos == '15'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
         with:
           file: coverage.lcov
           fail_ci_if_error: false
@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload debug build artifact
         if: matrix.macos == '15'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: VidPare-debug-macos${{ matrix.macos }}
           path: .build/debug/VidPare
@@ -146,7 +146,7 @@ jobs:
 
       - name: Upload release build artifact
         if: matrix.macos == '15'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: VidPare-release-macos${{ matrix.macos }}
           path: .build/release/VidPare
@@ -165,13 +165,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@45580472a5bb82c4681c4ac726cfdb60060c2ee1
         with:
           languages: swift
           queries: security-extended
@@ -180,6 +180,6 @@ jobs:
         run: swift build
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@45580472a5bb82c4681c4ac726cfdb60060c2ee1
         with:
           category: "/language:swift"

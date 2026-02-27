@@ -15,3 +15,10 @@
 
 - Added `i`, `j`, and `k` to `identifier_name.excluded` (alongside `id`, `x`, `y`).
 - This keeps lint signal focused on meaningful naming issues instead of common index variables.
+
+## 4) Workflow action pinning for supply-chain hardening
+
+- Replaced mutable action tags (`@v*`) with immutable full commit SHAs in:
+  - `.github/workflows/ci.yml`
+  - `.github/workflows/release.yml`
+- Validation approach: rely on normal GitHub Actions execution in CI after merge/push.
