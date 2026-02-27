@@ -23,7 +23,7 @@ final class VideoDocument {
         self.url = url
         self.asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
         self.fileName = url.lastPathComponent
-        if let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+        if let attrs = try? FileManager.default.attributesOfItem(atPath: url.path(percentEncoded: false)),
            let size = attrs[.size] as? Int64 {
             self.fileSize = size
         }
