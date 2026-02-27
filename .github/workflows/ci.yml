@@ -82,10 +82,17 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: .build
-          key: ${{ runner.os }}-${{ matrix.macos }}-spm-${{ hashFiles('Package.swift') }}-${{ github.sha }}
+          key: ${{ runner.os }}-${{ matrix.macos }}-spm-v2-${{ hashFiles('Package.swift') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.macos }}-spm-${{ hashFiles('Package.swift') }}-
-            ${{ runner.os }}-${{ matrix.macos }}-spm-
+            ${{ runner.os }}-${{ matrix.macos }}-spm-v2-${{ hashFiles('Package.swift') }}-
+            ${{ runner.os }}-${{ matrix.macos }}-spm-v2-
+
+      - name: Clean stale module cache
+        run: |
+          if [ -d .build ]; then
+            # Remove module caches that may contain stale paths from repo rename
+            find .build -name "ModuleCache" -type d -exec rm -rf {} + 2>/dev/null || true
+          fi
 
       - name: Build (debug)
         run: swift build -v
