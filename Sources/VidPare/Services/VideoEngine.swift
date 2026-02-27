@@ -1,0 +1,159 @@
+import AVFoundation
+import Observation
+
+@MainActor
+@Observable
+final class VideoEngine {
+    private(set) var isExporting = false
+    private(set) var progress: Double = 0
+    private var exportSession: AVAssetExportSession?
+    private var progressTimer: Timer?
+
+    struct ExportResult {
+        let outputURL: URL
+        let duration: TimeInterval
+        let fileSize: Int64
+    }
+
+    nonisolated static func effectiveQuality(
+        format: ExportFormat,
+        quality: QualityPreset,
+        sourceIsHEVC: Bool
+    ) -> QualityPreset {
+        (format.isHEVC && quality.isPassthrough && !sourceIsHEVC) ? .high : quality
+    }
+
+    func export(
+        asset: AVURLAsset,
+        trimRange: CMTimeRange,
+        format: ExportFormat,
+        quality: QualityPreset,
+        outputURL: URL,
+        sourceIsHEVC: Bool = false,
+        sourceURL: URL? = nil
+    ) async throws -> ExportResult {
+        let effectiveQuality = Self.effectiveQuality(format: format, quality: quality, sourceIsHEVC: sourceIsHEVC)
+
+        let scopedAccess = sourceURL?.startAccessingSecurityScopedResource() ?? false
+        defer {
+            if scopedAccess, let sourceURL {
+                sourceURL.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        let preset = effectiveQuality.exportPreset
+
+        guard let session = AVAssetExportSession(asset: asset, presetName: preset) else {
+            throw ExportError.sessionCreationFailed
+        }
+
+        session.outputURL = outputURL
+        session.outputFileType = format.fileType
+        session.timeRange = trimRange
+
+        self.exportSession = session
+        self.isExporting = true
+        self.progress = 0
+
+        startProgressPolling(session: session)
+
+        let startDate = Date()
+
+        do {
+            await session.export()
+
+            stopProgressPolling()
+
+            guard session.status == .completed else {
+                self.isExporting = false
+                try? FileManager.default.removeItem(at: outputURL)
+                if session.status == .cancelled {
+                    throw ExportError.cancelled
+                }
+                throw ExportError.exportFailed(session.error?.localizedDescription ?? "Unknown error")
+            }
+
+            let elapsed = Date().timeIntervalSince(startDate)
+            let attrs = try? FileManager.default.attributesOfItem(atPath: outputURL.path)
+            let fileSize = (attrs?[.size] as? Int64) ?? 0
+
+            self.isExporting = false
+            self.progress = 1.0
+
+            return ExportResult(outputURL: outputURL, duration: elapsed, fileSize: fileSize)
+        } catch {
+            stopProgressPolling()
+            self.isExporting = false
+            try? FileManager.default.removeItem(at: outputURL)
+            throw error
+        }
+    }
+
+    func cancelExport() {
+        exportSession?.cancelExport()
+        stopProgressPolling()
+        isExporting = false
+    }
+
+    /// Estimate output file size in bytes
+    nonisolated static func estimateOutputSize(
+        fileSize: Int64,
+        videoDuration: CMTime,
+        trimRange: CMTimeRange,
+        quality: QualityPreset
+    ) -> Int64 {
+        let totalSeconds = CMTimeGetSeconds(videoDuration)
+        let trimSeconds = CMTimeGetSeconds(trimRange.duration)
+        guard totalSeconds > 0, totalSeconds.isFinite else { return 0 }
+
+        let rawRatio = trimSeconds / totalSeconds
+        guard rawRatio.isFinite else { return 0 }
+        let ratio = min(max(rawRatio, 0.0), 1.0)
+
+        switch quality {
+        case .passthrough:
+            return Int64(Double(fileSize) * ratio)
+        case .high:
+            return Int64(Double(fileSize) * ratio * 0.9)
+        case .medium:
+            return Int64(Double(fileSize) * ratio * 0.5)
+        case .low:
+            return Int64(Double(fileSize) * ratio * 0.25)
+        }
+    }
+
+    // MARK: - Private
+
+    private func startProgressPolling(session: AVAssetExportSession) {
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                let newProgress = Double(session.progress)
+                if newProgress >= (self?.progress ?? 0) {
+                    self?.progress = newProgress
+                }
+            }
+        }
+    }
+
+    private func stopProgressPolling() {
+        progressTimer?.invalidate()
+        progressTimer = nil
+    }
+}
+
+enum ExportError: LocalizedError {
+    case sessionCreationFailed
+    case exportFailed(String)
+    case cancelled
+
+    var errorDescription: String? {
+        switch self {
+        case .sessionCreationFailed:
+            return "Failed to create export session. The file format may not support the selected export settings."
+        case .exportFailed(let reason):
+            return "Export failed: \(reason)"
+        case .cancelled:
+            return "Export was cancelled."
+        }
+    }
+}

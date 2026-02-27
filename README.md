@@ -1,0 +1,77 @@
+# VidPare
+
+A lightweight native macOS video trimmer built with Swift, SwiftUI, and AVFoundation.
+
+## Early MVP Demo
+
+[<video src="docs/demo/2026-02-27_14-56-00_trimmed.mp4" controls width="600"></video>](https://github.com/user-attachments/assets/51823d5b-558f-40fd-8626-8f4cb92a4e3a)
+
+## Motivation
+
+Web-based video trimming tools impose file size limits, require uploads, and rely on slow WASM-based processing. VidPare uses macOS-native AVFoundation for hardware-accelerated video operations, including passthrough remux (near-instant, lossless trimming without re-encoding).
+
+## Features (MVP)
+
+- Open MP4, MOV, M4V files via drag-and-drop or file picker
+- Video preview with scrubbing
+- Timeline with thumbnail strip and draggable trim handles
+- Export formats: MP4 (H.264), MOV (H.264), MP4 (HEVC)
+- Quality presets: Passthrough (default, fastest), High, Medium, Low
+- Estimated output size in export dialog
+- No file size limit
+
+## Requirements
+
+- macOS 14 (Sonoma) or later
+- Xcode 15+
+
+## Architecture
+
+```text
+SwiftUI Shell (views, timeline, export UI)
+    |
+VideoEngine (AVAsset, AVMutableComposition, AVAssetExportSession)
+    |
+AVFoundation (Apple, hardware-accelerated via VideoToolbox)
+```
+
+No ffmpeg. No Electron. No WASM.
+
+## Building & Running
+
+### With Xcode
+
+Open the project directory in Xcode (`File > Open...` on the repo root) — Xcode natively recognizes the `Package.swift` and provides full IDE support including signing and entitlements. Build with **Cmd+B** and run with **Cmd+R**.
+
+### From the command line
+
+Build:
+
+```bash
+swift build
+```
+
+Run the app directly:
+
+```bash
+.build/debug/VidPare
+```
+
+For an optimized release build:
+
+```bash
+swift build -c release
+.build/release/VidPare
+```
+
+### Running tests
+
+```bash
+swift test
+```
+
+The app targets macOS 14+ with local development signing.
+
+## License
+
+[MIT](LICENSE)
