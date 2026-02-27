@@ -16,6 +16,12 @@ Web-based video trimming tools impose file size limits, require uploads, and rel
 - Estimated output size in export dialog
 - No file size limit
 
+## MVP Demo Recording
+
+A real screen recording of the MVP in action is included here:
+
+- [2026-02-27_14-56-00_trimmed.mp4](docs/demo/2026-02-27_14-56-00_trimmed.mp4)
+
 ## Requirements
 
 - macOS 14 (Sonoma) or later
