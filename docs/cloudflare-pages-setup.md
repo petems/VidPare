@@ -3,7 +3,7 @@
 ## Deployment model
 - Use Cloudflare Pages **Git integration** (do not use GitHub deploy action for production).
 - Repo: `petems/vidpare`
-- Production branch: `main`
+- Production branch: `master`
 - Root directory: `site`
 - Build command: `npm ci && npm run build`
 - Build output directory: `dist`
