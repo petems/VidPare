@@ -28,3 +28,8 @@
 - Updated release notes generation to branch on whether `PREV_TAG` exists.
 - If `PREV_TAG` is present: emit compare URL.
 - If `PREV_TAG` is absent (first release): emit release-tag URL to avoid malformed `.../...` links.
+
+## 6) Correct `file_length` SwiftLint option key
+
+- Set `file_length.ignore_comment_only_lines: true`.
+- This uses the valid SwiftLint key and avoids configuration drift from non-existent options.
