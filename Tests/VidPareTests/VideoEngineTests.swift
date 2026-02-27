@@ -378,7 +378,11 @@ final class VideoEngineExportLifecycleTests: XCTestCase {
         let fixtureURL = try fixtureURL(named: "sample", ext: "mp4")
         let asset = AVURLAsset(url: fixtureURL)
         let duration = try await asset.load(.duration)
-        let end = CMTime(seconds: min(1.0, max(0.2, CMTimeGetSeconds(duration) / 2.0)), preferredTimescale: 600)
+        let maxTrimDuration: Double = 1.0
+        let minTrimDuration: Double = 0.2
+        let halfDuration = CMTimeGetSeconds(duration) / 2.0
+        let clampedTrimDuration = min(maxTrimDuration, max(minTrimDuration, halfDuration))
+        let end = CMTime(seconds: clampedTrimDuration, preferredTimescale: 600)
         let trimRange = CMTimeRange(start: .zero, end: end)
 
         let outputURL = uniqueTempURL(ext: "mp4")
@@ -445,12 +449,14 @@ final class VideoEngineExportLifecycleTests: XCTestCase {
             )
         }
 
-        for _ in 0..<50 {
-            if engine.isExporting {
-                break
-            }
-            try await Task.sleep(nanoseconds: 10_000_000)
+        let didStartExport = await waitForExportToStart(engine, timeoutSeconds: 3.0)
+        XCTAssertTrue(didStartExport, "Expected export to start before cancellation")
+        guard didStartExport else {
+            task.cancel()
+            _ = try? await task.value
+            return
         }
+
         engine.cancelExport()
 
         do {
@@ -485,5 +491,33 @@ extension VideoEngineExportLifecycleTests {
         FileManager.default.temporaryDirectory
             .appendingPathComponent("VideoEngineTests_\(UUID().uuidString)")
             .appendingPathExtension(ext)
+    }
+
+    @MainActor
+    private func waitForExportToStart(
+        _ engine: VideoEngine,
+        timeoutSeconds: TimeInterval
+    ) async -> Bool {
+        let exportStarted = expectation(description: "Export started")
+        var didStartExport = false
+
+        let pollingTask = Task { @MainActor in
+            let pollingIntervalNanos: UInt64 = 10_000_000
+            let timeoutDate = Date().addingTimeInterval(timeoutSeconds)
+
+            while Date() < timeoutDate {
+                if engine.isExporting {
+                    didStartExport = true
+                    exportStarted.fulfill()
+                    return
+                }
+
+                try? await Task.sleep(nanoseconds: pollingIntervalNanos)
+            }
+        }
+
+        await fulfillment(of: [exportStarted], timeout: timeoutSeconds + 0.5)
+        pollingTask.cancel()
+        return didStartExport
     }
 }
