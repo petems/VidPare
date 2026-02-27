@@ -190,6 +190,9 @@ struct ContentView: View {
         let doc = VideoDocument(url: url)
         Task {
             do {
+                defer {
+                    if accessing { url.stopAccessingSecurityScopedResource() }
+                }
                 try await doc.loadMetadata()
                 self.document = doc
                 trimState.reset(for: doc.duration)
@@ -202,7 +205,6 @@ struct ContentView: View {
                 // Generate thumbnails
                 await generateThumbnails(for: doc)
             } catch {
-                if accessing { url.stopAccessingSecurityScopedResource() }
                 showError(error.localizedDescription)
             }
         }
@@ -269,7 +271,8 @@ struct ContentView: View {
     private func setInPoint() {
         trimState.startTime = currentTime
         if CMTimeCompare(trimState.startTime, trimState.endTime) >= 0 {
-            trimState.endTime = document?.duration ?? currentTime
+            guard let document else { return }
+            trimState.endTime = document.duration
         }
     }
 
