@@ -1,4 +1,4 @@
-# Vidpare
+# VidPare
 
 Native macOS video trimmer built with Swift, SwiftUI, and AVFoundation. Uses hardware-accelerated passthrough remux for near-instant, lossless trimming without re-encoding.
 
@@ -12,10 +12,16 @@ Native macOS video trimmer built with Swift, SwiftUI, and AVFoundation. Uses har
 
 ## Code Style
 
-- Do not add excessive comments within function bodies. Only add comments within function bodies to highlight specific details that may not be obvious.
+- Do not add excessive comments within function bodies. Only add comments within function bodies to highlight details that may not be obvious.
 - Use 2 spaces for indentation
-- Run `swift format -i <path>` to format the code in place
+- Run `swift-format -i <path>` to format the code in place
 - Use `@Observable` macro (macOS 14+) instead of `ObservableObject` for state management
+
+## Dependencies
+
+```sh
+brew install swift-format swiftlint
+```
 
 ## Development Commands
 
@@ -25,7 +31,7 @@ Native macOS video trimmer built with Swift, SwiftUI, and AVFoundation. Uses har
   Build optimized release binary.
 - `swift test`
   Run unit tests with Swift Testing/XCTest.
-- `swift format`
+- `swift-format .`
   Format all code to match project style.
 - `swiftlint`
   Run static analysis and style checks.
