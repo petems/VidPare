@@ -32,11 +32,10 @@ chmod +x "${UNIVERSAL_BINARY}"
 PLIST_TEMPLATE="${ROOT_DIR}/scripts/release/Info.plist.template"
 PLIST_OUTPUT="${APP_DIR}/Contents/Info.plist"
 
-sed \
-  -e "s/__BUNDLE_ID__/${BUNDLE_ID}/g" \
-  -e "s/__VERSION__/${VERSION}/g" \
-  -e "s/__BUILD_NUMBER__/${BUILD_NUMBER}/g" \
-  "${PLIST_TEMPLATE}" > "${PLIST_OUTPUT}"
+cp "${PLIST_TEMPLATE}" "${PLIST_OUTPUT}"
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${BUNDLE_ID}" "${PLIST_OUTPUT}"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${PLIST_OUTPUT}"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUMBER}" "${PLIST_OUTPUT}"
 
 ARCHS="$(lipo -archs "${UNIVERSAL_BINARY}")"
 if [[ "${ARCHS}" != *"arm64"* || "${ARCHS}" != *"x86_64"* ]]; then
