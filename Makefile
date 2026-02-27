@@ -84,13 +84,17 @@ sign: ## Sign and notarize (requires Apple credentials)
 
 # ── Site ─────────────────────────────────────────────────────────────
 
+site/node_modules/.installed: site/package-lock.json
+	cd site && npm ci
+	@touch $@
+
 .PHONY: site-dev
-site-dev: ## Start product website dev server
-	cd site && npm ci && npm run dev
+site-dev: site/node_modules/.installed ## Start product website dev server
+	cd site && npm run dev
 
 .PHONY: site-build
-site-build: ## Production build of product website
-	cd site && npm ci && npm run build
+site-build: site/node_modules/.installed ## Production build of product website
+	cd site && npm run build
 
 # ── Housekeeping ─────────────────────────────────────────────────────
 
