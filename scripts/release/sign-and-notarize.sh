@@ -22,6 +22,14 @@ if [[ ! -e "${TARGET_PATH}" ]]; then
   exit 1
 fi
 
+APP_NOTARY_ZIP=""
+cleanup() {
+  if [[ -n "${APP_NOTARY_ZIP}" ]]; then
+    rm -f "${APP_NOTARY_ZIP}"
+  fi
+}
+trap cleanup EXIT
+
 if [[ "${TARGET_PATH}" == *.app ]]; then
   /usr/bin/codesign \
     --force \
@@ -34,8 +42,12 @@ if [[ "${TARGET_PATH}" == *.app ]]; then
   /usr/bin/codesign --verify --deep --strict --verbose=2 "${TARGET_PATH}"
   /usr/sbin/spctl --assess --type execute --verbose=2 "${TARGET_PATH}"
 
+  APP_NOTARY_ZIP="${TARGET_PATH}.zip"
+  rm -f "${APP_NOTARY_ZIP}"
+  /usr/bin/ditto -c -k --sequesterRsrc --keepParent "${TARGET_PATH}" "${APP_NOTARY_ZIP}"
+
   /usr/bin/xcrun notarytool submit \
-    "${TARGET_PATH}" \
+    "${APP_NOTARY_ZIP}" \
     --keychain-profile "${NOTARY_KEYCHAIN_PROFILE}" \
     --team-id "${APPLE_TEAM_ID}" \
     --wait
