@@ -343,6 +343,34 @@ final class VideoEngineTests: XCTestCase {
         }
     }
 
+    // MARK: - FourCharCode.codecName
+
+    func testCodecNameKnownCodecs() {
+        XCTAssertEqual(kCMVideoCodecType_H264.codecName, "H.264")
+        XCTAssertEqual(kCMVideoCodecType_HEVC.codecName, "HEVC (H.265)")
+        XCTAssertEqual(kCMVideoCodecType_MPEG4Video.codecName, "MPEG-4")
+    }
+
+    func testCodecNameUnknownCodec() {
+        // FourCharCode for 'test' = 0x74657374
+        let unknown: FourCharCode = 0x74657374
+        let name = unknown.codecName
+        XCTAssertEqual(name.count, 4)
+        XCTAssertEqual(name, "test")
+    }
+
+    func testVideoDocumentSupportedTypes() {
+        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mp4")))
+        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.MOV")))
+        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.m4v")))
+        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mkv")))
+        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.avi")))
+        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.webm")))
+    }
+}
+
+final class VideoEngineExportLifecycleTests: XCTestCase {
+
     // MARK: - Export lifecycle integration
 
     @MainActor
@@ -441,36 +469,11 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertFalse(engine.isExporting)
         XCTAssertFalse(FileManager.default.fileExists(atPath: outputURL.path))
     }
-
-    // MARK: - FourCharCode.codecName
-
-    func testCodecNameKnownCodecs() {
-        XCTAssertEqual(kCMVideoCodecType_H264.codecName, "H.264")
-        XCTAssertEqual(kCMVideoCodecType_HEVC.codecName, "HEVC (H.265)")
-        XCTAssertEqual(kCMVideoCodecType_MPEG4Video.codecName, "MPEG-4")
-    }
-
-    func testCodecNameUnknownCodec() {
-        // FourCharCode for 'test' = 0x74657374
-        let unknown: FourCharCode = 0x74657374
-        let name = unknown.codecName
-        XCTAssertEqual(name.count, 4)
-        XCTAssertEqual(name, "test")
-    }
-
-    func testVideoDocumentSupportedTypes() {
-        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mp4")))
-        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.MOV")))
-        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.m4v")))
-        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mkv")))
-        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.avi")))
-        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.webm")))
-    }
 }
 
 // MARK: - Private helpers (fixture & temp URL)
 
-extension VideoEngineTests {
+extension VideoEngineExportLifecycleTests {
     private func fixtureURL(named name: String, ext: String) throws -> URL {
         guard let url = Bundle.module.url(forResource: name, withExtension: ext) else {
             throw XCTSkip("Missing fixture: \(name).\(ext)")
