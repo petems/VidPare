@@ -70,6 +70,24 @@ swift build -c release
 swift test
 ```
 
+## Product Website (`vidpare.app`)
+
+A Cloudflare Pages-ready product site lives in `site/`.
+
+```bash
+cd site
+npm ci
+npm run dev
+```
+
+Production build:
+
+```bash
+npm ci && npm run build
+```
+
+Cloudflare Pages configuration details are in `docs/cloudflare-pages-setup.md`.
+
 The app targets macOS 14+ with local development signing.
 
 ## License
