@@ -24,9 +24,19 @@ enum TimeFormatter {
         let totalSeconds = CMTimeGetSeconds(time)
         guard totalSeconds.isFinite, totalSeconds >= 0 else { return "--:--.--" }
 
-        let hours = Int(totalSeconds) / 3600
-        let minutes = (Int(totalSeconds) % 3600) / 60
-        let seconds = totalSeconds.truncatingRemainder(dividingBy: 60)
+        var hours = Int(totalSeconds) / 3600
+        var minutes = (Int(totalSeconds) % 3600) / 60
+        var seconds = (totalSeconds.truncatingRemainder(dividingBy: 60) * 100).rounded() / 100
+
+        // Handle rollover from rounding (e.g. 59.997 -> 60.00)
+        if seconds >= 60.0 {
+            seconds -= 60.0
+            minutes += 1
+        }
+        if minutes >= 60 {
+            minutes -= 60
+            hours += 1
+        }
 
         if hours > 0 {
             return String(format: "%d:%02d:%05.2f", hours, minutes, seconds)
