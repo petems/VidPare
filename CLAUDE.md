@@ -79,5 +79,12 @@ site/                 # Cloudflare Pages product website
 
 ## Important Notes
 
-- **Never commit** `.xcconfig` files containing API keys.
+- **Never commit** `.xcconfig` files or `.env` files containing API keys (e.g., Cloudflare, Apple notarization, Firebase, Stripe, third-party ML APIs). Add any local config files to `.gitignore`.
+- **Storing secrets**:
+  - **Local dev**: use environment variables, `.env` files (never committed), macOS Keychain, or [`envchain`](https://github.com/sorah/envchain) to inject secrets per-command. Example:
+    ```sh
+    envchain cloudflare sh -c 'OTEL_TRACES_EXPORTER= TF_VAR_cloudflare_api_token=$CLOUDFLARE_API_TOKEN TF_VAR_cloudflare_account_id=$CLOUDFLARE_ACCOUNT_ID terraform plan'
+    ```
+  - **CI**: use GitHub Actions secrets, HashiCorp Vault, or equivalent encrypted secret stores.
+  - **Naming convention**: prefix keys with `VIDPARE_` (e.g., `VIDPARE_CLOUDFLARE_API_TOKEN`, `VIDPARE_APPLE_API_KEY`).
 - The project uses a `Package.swift`-based layout — open the repo root in Xcode (`File > Open...`) for full IDE support including signing and entitlements.
