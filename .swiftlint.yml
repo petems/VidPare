@@ -84,6 +84,9 @@ identifier_name:
     error: 80
   excluded:
     - id
+    - i
+    - j
+    - k
     - x
     - y
 

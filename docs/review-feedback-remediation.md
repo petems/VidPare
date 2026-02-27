@@ -10,3 +10,8 @@
 - Tightened `function_body_length` from `80/150` to `60/100` (`warning/error`).
 - Tightened `cyclomatic_complexity` from `15/25` to `12/20` (`warning/error`).
 - Purpose: nudge code toward smaller, easier-to-review functions before complexity spikes.
+
+## 3) Identifier exclusions for common loop counters
+
+- Added `i`, `j`, and `k` to `identifier_name.excluded` (alongside `id`, `x`, `y`).
+- This keeps lint signal focused on meaningful naming issues instead of common index variables.
