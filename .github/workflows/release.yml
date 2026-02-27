@@ -79,7 +79,11 @@ jobs:
             git log "$RANGE" --pretty=format:"- %s (%h)" --no-merges
             echo ""
             echo ""
-            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURRENT_TAG}"
+            if [ -n "$PREV_TAG" ]; then
+              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURRENT_TAG}"
+            else
+              echo "**Release**: https://github.com/${{ github.repository }}/releases/tag/${CURRENT_TAG}"
+            fi
           } > RELEASE_NOTES.md
 
           cat RELEASE_NOTES.md

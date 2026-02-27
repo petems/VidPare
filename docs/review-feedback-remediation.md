@@ -22,3 +22,9 @@
   - `.github/workflows/ci.yml`
   - `.github/workflows/release.yml`
 - Validation approach: rely on normal GitHub Actions execution in CI after merge/push.
+
+## 5) First-release changelog URL handling
+
+- Updated release notes generation to branch on whether `PREV_TAG` exists.
+- If `PREV_TAG` is present: emit compare URL.
+- If `PREV_TAG` is absent (first release): emit release-tag URL to avoid malformed `.../...` links.
