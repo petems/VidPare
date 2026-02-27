@@ -31,6 +31,4 @@ hdiutil create \
   -format UDZO \
   "${DMG_PATH}" >/dev/null
 
-rm -rf "${STAGING_DIR}"
-
 echo "Created DMG at: ${DMG_PATH}"
