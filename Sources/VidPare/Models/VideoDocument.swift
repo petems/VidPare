@@ -1,5 +1,6 @@
 import AVFoundation
 import AppKit
+import Observation
 
 @Observable
 final class VideoDocument {

@@ -1,4 +1,5 @@
 import AVFoundation
+import Observation
 import UniformTypeIdentifiers
 
 @Observable
