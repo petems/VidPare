@@ -140,6 +140,22 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertEqual(ThumbnailGenerator.thumbnailCount(forDuration: 300), 60)
     }
 
+    func testTrimStateInvalidOrderDuration() {
+        let state = TrimState()
+        state.startTime = CMTime(seconds: 40, preferredTimescale: 600)
+        state.endTime = CMTime(seconds: 10, preferredTimescale: 600)
+
+        XCTAssertEqual(CMTimeCompare(state.duration, .zero), 0)
+    }
+
+    func testTrimStateInvalidOrderTrimRange() {
+        let state = TrimState()
+        state.startTime = CMTime(seconds: 40, preferredTimescale: 600)
+        state.endTime = CMTime(seconds: 10, preferredTimescale: 600)
+
+        XCTAssertEqual(CMTimeCompare(state.trimRange.duration, .zero), 0)
+    }
+
     func testVideoDocumentSupportedTypes() {
         XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mp4")))
         XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.MOV")))

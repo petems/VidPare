@@ -4,7 +4,10 @@ import AVFoundation
 final class TrimState {
     var startTime: CMTime = .zero
     var endTime: CMTime = .zero
-    var duration: CMTime { CMTimeSubtract(endTime, startTime) }
+    var duration: CMTime {
+        let d = CMTimeSubtract(endTime, startTime)
+        return CMTimeCompare(d, .zero) > 0 ? d : .zero
+    }
 
     var exportFormat: ExportFormat = .mp4H264
     var qualityPreset: QualityPreset = .passthrough
@@ -15,7 +18,8 @@ final class TrimState {
     }
 
     var trimRange: CMTimeRange {
-        CMTimeRange(start: startTime, end: endTime)
+        let clampedEnd = CMTimeCompare(endTime, startTime) > 0 ? endTime : startTime
+        return CMTimeRange(start: startTime, end: clampedEnd)
     }
 }
 
