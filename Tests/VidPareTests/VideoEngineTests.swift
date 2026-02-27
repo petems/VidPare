@@ -92,6 +92,37 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertEqual(estimate, 0)
     }
 
+    func testEstimateIndefiniteDuration() {
+        let estimate = VideoEngine.estimateOutputSize(
+            fileSize: 100_000_000,
+            videoDuration: .indefinite,
+            trimRange: CMTimeRange(start: .zero, end: CMTime(seconds: 10, preferredTimescale: 600)),
+            quality: .passthrough
+        )
+        XCTAssertEqual(estimate, 0)
+    }
+
+    func testEstimateInvalidDuration() {
+        let estimate = VideoEngine.estimateOutputSize(
+            fileSize: 100_000_000,
+            videoDuration: .invalid,
+            trimRange: CMTimeRange(start: .zero, end: CMTime(seconds: 10, preferredTimescale: 600)),
+            quality: .passthrough
+        )
+        XCTAssertEqual(estimate, 0)
+    }
+
+    func testEstimateNegativeTrimRange() {
+        let estimate = VideoEngine.estimateOutputSize(
+            fileSize: 100_000_000,
+            videoDuration: CMTime(seconds: 60, preferredTimescale: 600),
+            trimRange: CMTimeRange(start: CMTime(seconds: 40, preferredTimescale: 600), end: CMTime(seconds: 10, preferredTimescale: 600)),
+            quality: .passthrough
+        )
+        // Negative trim results in clamped ratio of 0
+        XCTAssertEqual(estimate, 0)
+    }
+
     func testTrimStateReset() {
         let state = TrimState()
         let duration = CMTime(seconds: 60, preferredTimescale: 600)
@@ -99,6 +130,28 @@ final class VideoEngineTests: XCTestCase {
 
         XCTAssertEqual(CMTimeCompare(state.startTime, .zero), 0)
         XCTAssertEqual(CMTimeCompare(state.endTime, duration), 0)
+    }
+
+    func testTrimStateResetWithInvalidDuration() {
+        let state = TrimState()
+        state.startTime = CMTime(seconds: 10, preferredTimescale: 600)
+        state.endTime = CMTime(seconds: 50, preferredTimescale: 600)
+
+        state.reset(for: .invalid)
+        XCTAssertEqual(CMTimeCompare(state.startTime, .zero), 0)
+        XCTAssertEqual(CMTimeCompare(state.endTime, .zero), 0)
+    }
+
+    func testTrimStateResetWithIndefiniteDuration() {
+        let state = TrimState()
+        state.reset(for: .indefinite)
+        XCTAssertEqual(CMTimeCompare(state.endTime, .zero), 0)
+    }
+
+    func testTrimStateResetWithNegativeDuration() {
+        let state = TrimState()
+        state.reset(for: CMTime(seconds: -5, preferredTimescale: 600))
+        XCTAssertEqual(CMTimeCompare(state.endTime, .zero), 0)
     }
 
     func testTrimStateDuration() {

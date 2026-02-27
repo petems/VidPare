@@ -15,8 +15,12 @@ final class TrimState {
     var qualityPreset: QualityPreset = .passthrough
 
     func reset(for videoDuration: CMTime) {
+        let seconds = CMTimeGetSeconds(videoDuration)
+        let sanitized = (videoDuration.isValid && !videoDuration.isIndefinite && seconds.isFinite && seconds > 0)
+            ? videoDuration
+            : .zero
         startTime = .zero
-        endTime = videoDuration
+        endTime = sanitized
     }
 
     var trimRange: CMTimeRange {
