@@ -298,6 +298,48 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertFalse(state.isAtOrPastEnd(.zero))
     }
 
+    func testVideoDocumentRejectsNoVideoTrack() async throws {
+        let uid = UUID().uuidString
+        let m4aURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_audio_\(uid).m4a")
+        let mp4URL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_audio_\(uid).mp4")
+        defer {
+            try? FileManager.default.removeItem(at: m4aURL)
+            try? FileManager.default.removeItem(at: mp4URL)
+        }
+
+        // Create a valid audio-only M4A via macOS `say` command
+        let sayProcess = Process()
+        sayProcess.executableURL = URL(fileURLWithPath: "/usr/bin/say")
+        sayProcess.arguments = ["-o", m4aURL.path, "--data-format=aac", "test"]
+        try sayProcess.run()
+        sayProcess.waitUntilExit()
+        XCTAssertEqual(sayProcess.terminationStatus, 0, "say command failed")
+
+        // Convert to MP4 container via afconvert so VideoDocument.canOpen passes
+        let convertProcess = Process()
+        convertProcess.executableURL = URL(fileURLWithPath: "/usr/bin/afconvert")
+        convertProcess.arguments = [m4aURL.path, mp4URL.path, "-d", "aac", "-f", "mp4f"]
+        try convertProcess.run()
+        convertProcess.waitUntilExit()
+        XCTAssertEqual(convertProcess.terminationStatus, 0, "afconvert command failed")
+
+        let doc = VideoDocument(url: mp4URL)
+        do {
+            try await doc.loadMetadata()
+            XCTFail("Expected noVideoTrack error")
+        } catch let error as VideoDocumentError {
+            if case .noVideoTrack = error {
+                // Expected
+            } else {
+                XCTFail("Expected noVideoTrack, got \(error)")
+            }
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
+    }
+
     // MARK: - FourCharCode.codecName
 
     func testCodecNameKnownCodecs() {
