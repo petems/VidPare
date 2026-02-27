@@ -63,15 +63,10 @@ struct ExportSheet: View {
                     Picker("Quality", selection: $trimState.qualityPreset) {
                         ForEach(QualityPreset.allCases) { preset in
                             Text(preset.rawValue).tag(preset)
+                                .disabled(preset.isPassthrough && trimState.exportFormat.isHEVC)
                         }
                     }
                     .pickerStyle(.radioGroup)
-                    .onChange(of: trimState.qualityPreset) { _, newValue in
-                        // Auto-promote if HEVC with passthrough
-                        if trimState.exportFormat.isHEVC && newValue.isPassthrough {
-                            trimState.qualityPreset = .high
-                        }
-                    }
                     .onChange(of: trimState.exportFormat) { _, newValue in
                         if newValue.isHEVC && trimState.qualityPreset.isPassthrough {
                             trimState.qualityPreset = .high
