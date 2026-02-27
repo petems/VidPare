@@ -50,7 +50,11 @@ test-verbose: ## Run unit tests with verbose output
 .PHONY: coverage
 coverage: ## Run tests with code coverage and generate LCOV report
 	swift test --enable-code-coverage -v
-	@PROF_DATA=$$(swift test --show-codecov-path 2>/dev/null) && \
+	@PROF_DATA=$$(swift test --show-codecov-path); \
+	if [ -z "$$PROF_DATA" ]; then \
+		echo "Error: Failed to get code coverage path." >&2; \
+		exit 1; \
+	fi; \
 	xcrun llvm-cov export \
 	  -format="lcov" \
 	  -instr-profile="$$(echo $$PROF_DATA | sed 's|codecov/.*|profdata/merged/default.profdata|')" \
