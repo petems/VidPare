@@ -67,6 +67,7 @@ struct ContentView: View {
                     Label("Open", systemImage: "folder")
                 }
                 .keyboardShortcut("o")
+                .disabled(videoEngine.isExporting)
 
                 if document != nil {
                     Button {
@@ -183,6 +184,11 @@ struct ContentView: View {
     // MARK: - Video Loading
 
     private func loadVideo(url: URL) {
+        guard !videoEngine.isExporting else {
+            showError("Cannot open a new file while an export is in progress.")
+            return
+        }
+
         guard VideoDocument.canOpen(url: url) else {
             showError(VideoDocumentError.unsupportedFormat(url.pathExtension).localizedDescription)
             return
@@ -220,6 +226,7 @@ struct ContentView: View {
     }
 
     private func handleDrop(providers: [NSItemProvider]) -> Bool {
+        guard !videoEngine.isExporting else { return false }
         guard let provider = providers.first,
               provider.registeredTypeIdentifiers.contains(UTType.fileURL.identifier) else {
             return false

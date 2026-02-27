@@ -234,6 +234,18 @@ final class VideoEngineTests: XCTestCase {
         }
     }
 
+    // MARK: - VideoEngine state
+
+    func testVideoEngineIsNotExportingByDefault() {
+        let engine = VideoEngine()
+        XCTAssertFalse(engine.isExporting)
+    }
+
+    func testVideoEngineProgressStartsAtZero() {
+        let engine = VideoEngine()
+        XCTAssertEqual(engine.progress, 0)
+    }
+
     // MARK: - VideoEngine.effectiveQuality
 
     func testEffectiveQuality_hevcPassthrough_nonHEVCSource() {

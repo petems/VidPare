@@ -133,6 +133,7 @@ vidpare/
 - Test with various file sizes (small 10MB clips, large 2GB+ files)
 - Test with H.264 and HEVC source files
 - Attempt to open .mkv or .avi — verify clear error message
+- Start an export, try opening a new file — verify it is blocked with error message
 - Verify estimated output size is shown and roughly accurate after export
 
 ## Important Technical Notes
@@ -142,4 +143,5 @@ vidpare/
 - For passthrough export, trim points snap to keyframes — the UI should communicate this clearly
 - HEVC encoding is significantly slower than H.264 even with hardware acceleration — worth noting in UI
 - `AVAssetExportSession.progress` can be unreliable; poll at ~0.5s intervals and handle non-monotonic values
+- Security-scoped resource access is reference-counted on macOS. The export method retains an extra reference to the source URL's security scope for the duration of the export, preventing permission errors if the user loads a new file concurrently. File loading is also blocked during active exports.
 - The project uses a `Package.swift`-based layout. Open the package directory in Xcode (`File > Open...` on the repo root) to get full Xcode integration including signing, entitlements, and asset catalog support. Alternatively, build from CLI with `swift build`.

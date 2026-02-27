@@ -28,9 +28,17 @@ final class VideoEngine {
         format: ExportFormat,
         quality: QualityPreset,
         outputURL: URL,
-        sourceIsHEVC: Bool = false
+        sourceIsHEVC: Bool = false,
+        sourceURL: URL? = nil
     ) async throws -> ExportResult {
         let effectiveQuality = Self.effectiveQuality(format: format, quality: quality, sourceIsHEVC: sourceIsHEVC)
+
+        let scopedAccess = sourceURL?.startAccessingSecurityScopedResource() ?? false
+        defer {
+            if scopedAccess, let sourceURL {
+                sourceURL.stopAccessingSecurityScopedResource()
+            }
+        }
 
         let preset = effectiveQuality.exportPreset
 

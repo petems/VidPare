@@ -169,7 +169,8 @@ struct ExportSheet: View {
                     format: trimState.exportFormat,
                     quality: effectiveQuality,
                     outputURL: url,
-                    sourceIsHEVC: document.isHEVC
+                    sourceIsHEVC: document.isHEVC,
+                    sourceURL: document.url
                 )
                 exportResult = result
             } catch is CancellationError {
