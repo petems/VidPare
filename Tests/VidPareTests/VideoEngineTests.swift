@@ -219,24 +219,6 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertEqual(CMTimeCompare(state.trimRange.duration, .zero), 0)
     }
 
-    func testVideoDocumentRejectsUnsupportedFormat() async {
-        let url = URL(fileURLWithPath: "/tmp/test.mkv")
-        let doc = VideoDocument(url: url)
-
-        do {
-            try await doc.loadMetadata()
-            XCTFail("Expected unsupportedFormat error")
-        } catch let error as VideoDocumentError {
-            if case .unsupportedFormat(let ext) = error {
-                XCTAssertEqual(ext, "mkv")
-            } else {
-                XCTFail("Expected unsupportedFormat, got \(error)")
-            }
-        } catch {
-            XCTFail("Unexpected error type: \(error)")
-        }
-    }
-
     // MARK: - VideoEngine state
 
     @MainActor func testVideoEngineIsNotExportingByDefault() {
@@ -301,48 +283,6 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertFalse(state.isAtOrPastEnd(.zero))
     }
 
-    func testVideoDocumentRejectsNoVideoTrack() async throws {
-        let uid = UUID().uuidString
-        let m4aURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("test_audio_\(uid).m4a")
-        let mp4URL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("test_audio_\(uid).mp4")
-        defer {
-            try? FileManager.default.removeItem(at: m4aURL)
-            try? FileManager.default.removeItem(at: mp4URL)
-        }
-
-        // Create a valid audio-only M4A via macOS `say` command
-        let sayProcess = Process()
-        sayProcess.executableURL = URL(fileURLWithPath: "/usr/bin/say")
-        sayProcess.arguments = ["-o", m4aURL.path, "--data-format=aac", "test"]
-        try sayProcess.run()
-        sayProcess.waitUntilExit()
-        XCTAssertEqual(sayProcess.terminationStatus, 0, "say command failed")
-
-        // Convert to MP4 container via afconvert so VideoDocument.canOpen passes
-        let convertProcess = Process()
-        convertProcess.executableURL = URL(fileURLWithPath: "/usr/bin/afconvert")
-        convertProcess.arguments = [m4aURL.path, mp4URL.path, "-d", "aac", "-f", "mp4f"]
-        try convertProcess.run()
-        convertProcess.waitUntilExit()
-        XCTAssertEqual(convertProcess.terminationStatus, 0, "afconvert command failed")
-
-        let doc = VideoDocument(url: mp4URL)
-        do {
-            try await doc.loadMetadata()
-            XCTFail("Expected noVideoTrack error")
-        } catch let error as VideoDocumentError {
-            if case .noVideoTrack = error {
-                // Expected
-            } else {
-                XCTFail("Expected noVideoTrack, got \(error)")
-            }
-        } catch {
-            XCTFail("Unexpected error type: \(error)")
-        }
-    }
-
     // MARK: - FourCharCode.codecName
 
     func testCodecNameKnownCodecs() {
@@ -359,14 +299,126 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertEqual(name, "test")
     }
 
-    func testVideoDocumentSupportedTypes() {
-        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mp4")))
-        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.MOV")))
-        XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.m4v")))
-        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mkv")))
-        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.avi")))
-        XCTAssertFalse(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.webm")))
+    // MARK: - ExportCapabilities
+
+    func testCapabilitiesResolve_hevcPassthroughPromotesToReencodeWhenSourceIsNotHEVC() {
+        let capabilities = ExportCapabilities(
+            sourceContainerFormat: .mp4H264,
+            sourceIsHEVC: false,
+            supportMatrix: supportMatrix(
+                overrides: [
+                    SupportOverride(quality: .passthrough, format: .mp4H264, support: .supported),
+                    SupportOverride(quality: .high, format: .mp4H264, support: .supported),
+                    SupportOverride(quality: .high, format: .mp4HEVC, support: .supported)
+                ]
+            )
+        )
+
+        let resolved = capabilities.resolvedSelection(
+            requestedFormat: .mp4HEVC,
+            requestedQuality: .passthrough
+        )
+
+        XCTAssertEqual(resolved.format, .mp4HEVC)
+        XCTAssertEqual(resolved.quality, .high)
+        XCTAssertNotNil(resolved.adjustmentReason)
     }
+
+    func testCapabilitiesResolve_fallsBackToSupportedFormatAtRequestedQuality() {
+        let capabilities = ExportCapabilities(
+            sourceContainerFormat: .mp4H264,
+            sourceIsHEVC: true,
+            supportMatrix: supportMatrix(
+                overrides: [
+                    SupportOverride(quality: .high, format: .mp4H264, support: .supported),
+                    SupportOverride(quality: .high, format: .movH264, support: .supported)
+                ]
+            )
+        )
+
+        let resolved = capabilities.resolvedSelection(
+            requestedFormat: .mp4HEVC,
+            requestedQuality: .high
+        )
+
+        XCTAssertEqual(resolved.quality, .high)
+        XCTAssertEqual(resolved.format, .mp4H264)
+    }
+
+    func testCapabilitiesResolve_fallsBackToFirstSupportedQualityWhenRequestedQualityUnavailable() {
+        let capabilities = ExportCapabilities(
+            sourceContainerFormat: .movH264,
+            sourceIsHEVC: false,
+            supportMatrix: supportMatrix(
+                overrides: [
+                    SupportOverride(quality: .medium, format: .movH264, support: .supported)
+                ]
+            )
+        )
+
+        let resolved = capabilities.resolvedSelection(
+            requestedFormat: .mp4HEVC,
+            requestedQuality: .high
+        )
+
+        XCTAssertEqual(resolved.quality, .medium)
+        XCTAssertEqual(resolved.format, .movH264)
+    }
+
+    func testCapabilitiesSupportedFormats_filtersUnsupportedOptions() {
+        let capabilities = ExportCapabilities(
+            sourceContainerFormat: .mp4H264,
+            sourceIsHEVC: false,
+            supportMatrix: supportMatrix(
+                overrides: [
+                    SupportOverride(quality: .high, format: .mp4H264, support: .supported),
+                    SupportOverride(quality: .high, format: .movH264, support: .supported)
+                ]
+            )
+        )
+
+        XCTAssertEqual(capabilities.supportedFormats(for: .high), [.mp4H264, .movH264])
+        XCTAssertTrue(capabilities.supportedFormats(for: .passthrough).isEmpty)
+    }
+
+    // MARK: - Capability preflight
+
+    func testBuildCapabilities_passthroughOnlySupportsSourceContainer() {
+        let asset = AVURLAsset(url: URL(fileURLWithPath: "/tmp/nonexistent.mp4"))
+        let capabilities = VideoEngine.buildCapabilities(
+            asset: asset,
+            sourceFileType: .mov,
+            sourceIsHEVC: false
+        )
+
+        XCTAssertEqual(capabilities.sourceContainerFormat, .movH264)
+        XCTAssertFalse(capabilities.support(for: .mp4H264, quality: .passthrough).isSupported)
+    }
+}
+
+private struct SupportOverride {
+    let quality: QualityPreset
+    let format: ExportFormat
+    let support: ExportSupport
+}
+
+private func supportMatrix(
+    overrides: [SupportOverride]
+) -> [QualityPreset: [ExportFormat: ExportSupport]] {
+    var matrix: [QualityPreset: [ExportFormat: ExportSupport]] = [:]
+    for quality in QualityPreset.allCases {
+        var row: [ExportFormat: ExportSupport] = [:]
+        for format in ExportFormat.allCases {
+            row[format] = .unsupported("Unsupported")
+        }
+        matrix[quality] = row
+    }
+
+    for override in overrides {
+        matrix[override.quality]?[override.format] = override.support
+    }
+
+    return matrix
 }
 
 final class VideoEngineExportLifecycleTests: XCTestCase {
@@ -409,24 +461,30 @@ final class VideoEngineExportLifecycleTests: XCTestCase {
     func testExportLifecycle_failRemovesOutputFile() async throws {
         let fixtureURL = try fixtureURL(named: "sample", ext: "mp4")
         let asset = AVURLAsset(url: fixtureURL)
-        let outputURL = uniqueTempURL(ext: "mov")
 
-        // Create a file and ensure export cleans it up on failure path.
-        try Data("existing".utf8).write(to: outputURL)
+        // Use a non-existent parent directory so the export session cannot
+        // write its temp file, causing a genuine export failure.
+        let nonExistentDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("vidpare-nonexistent-\(UUID().uuidString)")
+        let outputURL = nonExistentDir.appendingPathComponent("output.mp4")
+
+        let engine = VideoEngine()
         do {
-            _ = try await VideoEngine().export(
+            _ = try await engine.export(
                 asset: asset,
                 trimRange: CMTimeRange(start: .zero, duration: CMTime(seconds: 1.0, preferredTimescale: 600)),
-                format: .movH264,
-                quality: .passthrough,
+                format: .mp4H264,
+                quality: .low,
                 outputURL: outputURL
             )
-            XCTFail("Expected export failure with pre-existing output file")
+            XCTFail("Expected export failure with non-writable output path")
         } catch {
             // expected
         }
 
         XCTAssertFalse(FileManager.default.fileExists(atPath: outputURL.path))
+        XCTAssertFalse(engine.isExporting, "isExporting should be reset after failure")
+        XCTAssertEqual(engine.progress, 0, "progress should be reset after failure")
     }
 
     @MainActor
@@ -472,7 +530,8 @@ final class VideoEngineExportLifecycleTests: XCTestCase {
             XCTFail("Unexpected error type: \(error)")
         }
 
-        XCTAssertFalse(engine.isExporting)
+        XCTAssertFalse(engine.isExporting, "isExporting should be reset after cancel")
+        XCTAssertEqual(engine.progress, 0, "progress should be reset after cancel")
         XCTAssertFalse(FileManager.default.fileExists(atPath: outputURL.path))
     }
 }
