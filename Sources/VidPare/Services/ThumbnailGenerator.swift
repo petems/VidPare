@@ -11,7 +11,7 @@ final class ThumbnailGenerator {
         self.generator.appliesPreferredTrackTransform = true
         self.generator.maximumSize = CGSize(width: 160, height: 90)
         self.generator.requestedTimeToleranceBefore = .zero
-        self.generator.requestedTimeToleranceAfter = CMTime(seconds: 1, preferredTimescale: 600)
+        self.generator.requestedTimeToleranceAfter = CMTime(seconds: 0.1, preferredTimescale: 600)
     }
 
     func generateThumbnails(count: Int) async throws -> [NSImage] {
@@ -29,19 +29,19 @@ final class ThumbnailGenerator {
 
         return try await withCheckedThrowingContinuation { continuation in
             var images: [Int: NSImage] = [:]
-            var currentIndex = 0
+            var completedCount = 0
             let expectedCount = times.count
 
-            generator.generateCGImagesAsynchronously(forTimes: times) { _, cgImage, _, result, error in
-                let index = currentIndex
-                currentIndex += 1
-
+            generator.generateCGImagesAsynchronously(forTimes: times) { requestedTime, cgImage, _, result, error in
                 if let cgImage = cgImage, result == .succeeded {
-                    let nsImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
-                    images[index] = nsImage
+                    if let index = times.firstIndex(where: { CMTimeCompare($0.timeValue, requestedTime) == 0 }) {
+                        let nsImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
+                        images[index] = nsImage
+                    }
                 }
 
-                if currentIndex == expectedCount {
+                completedCount += 1
+                if completedCount == expectedCount {
                     let sorted = (0..<expectedCount).compactMap { images[$0] }
                     continuation.resume(returning: sorted)
                 }
