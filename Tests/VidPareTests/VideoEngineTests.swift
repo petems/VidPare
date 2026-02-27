@@ -298,6 +298,22 @@ final class VideoEngineTests: XCTestCase {
         XCTAssertFalse(state.isAtOrPastEnd(.zero))
     }
 
+    // MARK: - FourCharCode.codecName
+
+    func testCodecNameKnownCodecs() {
+        XCTAssertEqual(kCMVideoCodecType_H264.codecName, "H.264")
+        XCTAssertEqual(kCMVideoCodecType_HEVC.codecName, "HEVC (H.265)")
+        XCTAssertEqual(kCMVideoCodecType_MPEG4Video.codecName, "MPEG-4")
+    }
+
+    func testCodecNameUnknownCodec() {
+        // FourCharCode for 'test' = 0x74657374
+        let unknown: FourCharCode = 0x74657374
+        let name = unknown.codecName
+        XCTAssertEqual(name.count, 4)
+        XCTAssertEqual(name, "test")
+    }
+
     func testVideoDocumentSupportedTypes() {
         XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.mp4")))
         XCTAssertTrue(VideoDocument.canOpen(url: URL(fileURLWithPath: "/test.MOV")))

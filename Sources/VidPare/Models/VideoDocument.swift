@@ -75,19 +75,20 @@ enum VideoDocumentError: LocalizedError {
     }
 }
 
-private extension FourCharCode {
+extension FourCharCode {
     var codecName: String {
         switch self {
         case kCMVideoCodecType_H264: return "H.264"
         case kCMVideoCodecType_HEVC: return "HEVC (H.265)"
         case kCMVideoCodecType_MPEG4Video: return "MPEG-4"
         default:
-            let chars = [
-                Character(UnicodeScalar((self >> 24) & 0xFF)!),
-                Character(UnicodeScalar((self >> 16) & 0xFF)!),
-                Character(UnicodeScalar((self >> 8) & 0xFF)!),
-                Character(UnicodeScalar(self & 0xFF)!)
-            ]
+            let chars = (0..<4).map { shift -> Character in
+                let byte = (self >> (24 - shift * 8)) & 0xFF
+                if let scalar = UnicodeScalar(byte) {
+                    return Character(scalar)
+                }
+                return Character("\u{FFFD}")
+            }
             return String(chars)
         }
     }
