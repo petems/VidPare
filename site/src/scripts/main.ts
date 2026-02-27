@@ -25,7 +25,11 @@ if (!prefersReducedMotion && 'IntersectionObserver' in window) {
     { threshold: 0.2 }
   );
 
-  revealNodes.forEach((node) => observer.observe(node));
+  revealNodes.forEach((node) => {
+    observer.observe(node);
+  });
 } else {
-  revealNodes.forEach((node) => node.classList.add('in-view'));
+  revealNodes.forEach((node) => {
+    node.classList.add('in-view');
+  });
 }

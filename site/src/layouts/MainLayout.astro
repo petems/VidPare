@@ -10,6 +10,8 @@ const {
   title = 'VidPare — Native macOS Video Trimmer',
   description = 'Free and open source native macOS video trimmer built with SwiftUI and AVFoundation.'
 } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -25,13 +27,13 @@ const {
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content="https://vidpare.app" />
+    <meta property="og:url" content={canonicalUrl.toString()} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    <link rel="canonical" href="https://vidpare.app/" />
+    <link rel="canonical" href={canonicalUrl.toString()} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://github.com" />
   </head>

@@ -79,7 +79,6 @@ npm run dev
 Production build:
 
 ```bash
-cd site
 npm ci && npm run build
 ```
 
