@@ -471,19 +471,22 @@ final class VideoEngineExportLifecycleTests: XCTestCase {
     func testExportLifecycle_failRemovesOutputFile() async throws {
         let fixtureURL = try fixtureURL(named: "sample", ext: "mp4")
         let asset = AVURLAsset(url: fixtureURL)
-        let outputURL = uniqueTempURL(ext: "mov")
 
-        // Create a file and ensure export cleans it up on failure path.
-        try Data("existing".utf8).write(to: outputURL)
+        // Use a non-existent parent directory so the export session cannot
+        // write its temp file, causing a genuine export failure.
+        let nonExistentDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("vidpare-nonexistent-\(UUID().uuidString)")
+        let outputURL = nonExistentDir.appendingPathComponent("output.mp4")
+
         do {
             _ = try await VideoEngine().export(
                 asset: asset,
                 trimRange: CMTimeRange(start: .zero, duration: CMTime(seconds: 1.0, preferredTimescale: 600)),
-                format: .movH264,
-                quality: .passthrough,
+                format: .mp4H264,
+                quality: .low,
                 outputURL: outputURL
             )
-            XCTFail("Expected export failure with pre-existing output file")
+            XCTFail("Expected export failure with non-writable output path")
         } catch {
             // expected
         }
