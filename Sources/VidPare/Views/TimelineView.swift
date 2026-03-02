@@ -33,6 +33,7 @@ struct TimelineView: View {
                 trimHandle(isStart: false, width: width, height: height)
             }
             .frame(height: height)
+            .coordinateSpace(name: "timeline")
             .contentShape(Rectangle())
             .onTapGesture { location in
                 let fraction = max(0, min(1, location.x / width))
@@ -114,9 +115,8 @@ struct TimelineView: View {
                     .fill(Color.white)
                     .frame(width: 2, height: 20)
             )
-            .offset(x: isStart ? x - 12 : x)
             .gesture(
-                DragGesture()
+                DragGesture(coordinateSpace: .named("timeline"))
                     .onChanged { value in
                         let newX = value.location.x
                         let fraction = max(0, min(1, newX / width))
@@ -137,6 +137,7 @@ struct TimelineView: View {
                         }
                     }
             )
+            .offset(x: isStart ? x - 12 : x)
             .cursor(.resizeLeftRight)
     }
 
