@@ -13,6 +13,8 @@ enum AccessibilityID {
   static let timeline = "vidpare.timeline"
   static let startHandle = "vidpare.timeline.startHandle"
   static let endHandle = "vidpare.timeline.endHandle"
+  static let trimHandleStart = "vidpare.trimHandle.start"
+  static let trimHandleEnd = "vidpare.trimHandle.end"
 
   // ExportSheet
   static let exportButton = "vidpare.export.exportButton"

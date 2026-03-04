@@ -126,6 +126,14 @@ public func findElement(withRole role: String, in element: AXUIElement) -> AXUIE
   return nil
 }
 
+/// Return the sheet attached to a window, if any.
+func axSheet(of window: AXUIElement) -> AXUIElement? {
+  for child in axChildren(of: window) where axRole(of: child) == "AXSheet" {
+    return child
+  }
+  return nil
+}
+
 /// Recursively search for an element matching a role whose value contains a substring.
 public func findElement(
   withRole role: String,
@@ -169,6 +177,50 @@ public func axSize(of element: AXUIElement) -> CGSize? {
   var size = CGSize.zero
   guard AXValueGetValue(axVal, .cgSize, &size) else { return nil }
   return size
+}
+
+/// Return the screen-space frame (position + size) of an AX element.
+public func axFrame(of element: AXUIElement) -> CGRect? {
+  guard let position = axPosition(of: element),
+    let size = axSize(of: element)
+  else { return nil }
+  return CGRect(origin: position, size: size)
+}
+
+/// Simulate a mouse drag from one screen point to another.
+public func simulateDrag(from start: CGPoint, to end: CGPoint, steps: Int = 10) {
+  let source = CGEventSource(stateID: .combinedSessionState)
+
+  CGEvent(
+    mouseEventSource: source,
+    mouseType: .leftMouseDown,
+    mouseCursorPosition: start,
+    mouseButton: .left
+  )?.post(tap: .cghidEventTap)
+  Thread.sleep(forTimeInterval: 0.05)
+
+  for step in 1...steps {
+    let fraction = CGFloat(step) / CGFloat(steps)
+    let point = CGPoint(
+      x: start.x + (end.x - start.x) * fraction,
+      y: start.y + (end.y - start.y) * fraction
+    )
+    CGEvent(
+      mouseEventSource: source,
+      mouseType: .leftMouseDragged,
+      mouseCursorPosition: point,
+      mouseButton: .left
+    )?.post(tap: .cghidEventTap)
+    Thread.sleep(forTimeInterval: 0.02)
+  }
+
+  CGEvent(
+    mouseEventSource: source,
+    mouseType: .leftMouseUp,
+    mouseCursorPosition: end,
+    mouseButton: .left
+  )?.post(tap: .cghidEventTap)
+  Thread.sleep(forTimeInterval: 0.05)
 }
 
 /// Wait for a condition to become true, polling at intervals.

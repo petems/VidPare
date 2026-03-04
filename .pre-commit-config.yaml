@@ -1,0 +1,52 @@
+# See https://pre-commit.com for more information
+
+default_stages: [pre-commit]
+
+repos:
+  # ── General-purpose hooks ─────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: no-commit-to-branch
+        args: [--branch, master, --branch, main]
+
+  # ── Conventional Commits (commit-msg hook) ────────────────────────
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.13.9
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  # ── Swift-specific hooks (system-installed via Homebrew) ──────────
+  - repo: local
+    hooks:
+      - id: swiftlint
+        name: SwiftLint
+        entry: swiftlint lint --quiet --force-exclude
+        language: system
+        types: [swift]
+
+      - id: swift-format-check
+        name: swift-format (check)
+        entry: swift-format lint --parallel
+        language: system
+        types: [swift]
+
+      - id: swift-test
+        name: swift test (unit + snapshot)
+        entry: swift test --skip VidPareAcceptanceTests
+        language: system
+        types: [swift]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

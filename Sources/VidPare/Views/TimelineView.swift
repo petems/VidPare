@@ -8,6 +8,8 @@ struct TimelineView: View {
     @Bindable var trimState: TrimState
     var onSeek: (CMTime) -> Void
 
+    private static let timelineCoordinateSpace = "timeline"
+
     private var totalSeconds: Double {
         let durationSeconds = CMTimeGetSeconds(duration)
         return durationSeconds.isFinite && durationSeconds > 0 ? durationSeconds : 1
@@ -33,16 +35,17 @@ struct TimelineView: View {
                 trimHandle(isStart: false, width: width, height: height)
             }
             .frame(height: height)
+            .coordinateSpace(name: Self.timelineCoordinateSpace)
             .contentShape(Rectangle())
             .onTapGesture { location in
                 let fraction = max(0, min(1, location.x / width))
                 let time = CMTime(seconds: fraction * totalSeconds, preferredTimescale: 600)
                 onSeek(time)
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier(AccessibilityID.timeline)
         }
         .frame(height: 56)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier(AccessibilityID.timeline)
     }
 
     @ViewBuilder
@@ -115,9 +118,8 @@ struct TimelineView: View {
                     .fill(Color.white)
                     .frame(width: 2, height: 20)
             )
-            .offset(x: isStart ? max(0, x - 12) : min(x, width - 12))
             .gesture(
-                DragGesture()
+                DragGesture(coordinateSpace: .named(Self.timelineCoordinateSpace))
                     .onChanged { value in
                         let newX = value.location.x
                         let fraction = max(0, min(1, newX / width))
@@ -138,17 +140,26 @@ struct TimelineView: View {
                         }
                     }
             )
+            .offset(x: Self.trimHandleOffset(isStart: isStart, x: x, width: width))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(isStart ? "Start trim handle" : "End trim handle")
-            .accessibilityIdentifier(isStart ? AccessibilityID.startHandle : AccessibilityID.endHandle)
+            .accessibilityIdentifier(isStart ? AccessibilityID.trimHandleStart : AccessibilityID.trimHandleEnd)
             .cursor(.resizeLeftRight)
     }
 
     private func xPosition(for time: CMTime, in width: CGFloat) -> CGFloat {
+        Self.xPosition(for: time, totalSeconds: totalSeconds, in: width)
+    }
+
+    static func xPosition(for time: CMTime, totalSeconds: Double, in width: CGFloat) -> CGFloat {
         let seconds = CMTimeGetSeconds(time)
-        guard seconds.isFinite else { return 0 }
+        guard seconds.isFinite, totalSeconds > 0 else { return 0 }
         let clamped = min(max(seconds, 0), totalSeconds)
         return CGFloat(clamped / totalSeconds) * width
+    }
+
+    static func trimHandleOffset(isStart: Bool, x: CGFloat, width: CGFloat) -> CGFloat {
+        isStart ? max(0, x - 12) : min(width - 12, x)
     }
 }
 
