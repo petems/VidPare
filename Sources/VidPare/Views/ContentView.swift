@@ -3,6 +3,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
+    let initialFileURL: URL?
+
     @State private var document: VideoDocument?
     @State private var trimState = TrimState()
     @State private var videoEngine = VideoEngine()
@@ -17,6 +19,10 @@ struct ContentView: View {
     @State private var timeObserver: Any?
     @State private var isLoadingThumbnails = false
     @State private var currentSecurityScopedURL: URL?
+
+    init(initialFileURL: URL? = nil) {
+      self.initialFileURL = initialFileURL
+    }
 
     var body: some View {
         Group {
@@ -83,11 +89,8 @@ struct ContentView: View {
         }
         .navigationTitle(windowTitle)
         .onAppear {
-            if let path = ProcessInfo.processInfo.environment["VIDPARE_OPEN_FILE"] {
-                let url = URL(fileURLWithPath: path)
-                if FileManager.default.fileExists(atPath: url.path) {
-                    loadVideo(url: url)
-                }
+            if let url = initialFileURL {
+                loadVideo(url: url)
             }
         }
         .onDisappear {
@@ -122,6 +125,7 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black.opacity(0.02))
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.dropTarget)
     }
 

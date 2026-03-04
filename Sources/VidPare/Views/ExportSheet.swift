@@ -297,35 +297,48 @@ struct ExportSheet: View {
     savePanel.nameFieldStringValue = exportFileName(for: resolved.format)
     savePanel.canCreateDirectories = true
 
-    // Use begin() instead of runModal() to avoid a modal-session conflict
-    // with the SwiftUI .sheet that hosts ExportSheet. runModal() blocks the
-    // thread and steals keyboard focus, leaving the filename field visible
-    // but non-editable.
-    savePanel.begin { response in
-      guard response == .OK, let url = savePanel.url else { return }
+    if let window = NSApp.keyWindow {
+      savePanel.beginSheetModal(for: window) { response in
+        self.handleSavePanelResponse(
+          response, url: savePanel.url, format: resolved.format, quality: resolved.quality)
+      }
+    } else {
+      savePanel.begin { response in
+        self.handleSavePanelResponse(
+          response, url: savePanel.url, format: resolved.format, quality: resolved.quality)
+      }
+    }
+  }
 
-      Task { @MainActor in
-        do {
-          let result = try await videoEngine.export(
-            asset: document.asset,
-            trimRange: trimState.trimRange,
-            format: resolved.format,
-            quality: resolved.quality,
-            outputURL: url,
-            sourceIsHEVC: document.isHEVC,
-            sourceURL: document.url,
-            sourceFileType: document.sourceFileType
-          )
-          exportResult = result
-          NSSound(named: "Glass")?.play()
-        } catch is CancellationError {
-          // User cancelled, do nothing
-        } catch ExportError.cancelled {
-          // Export cancelled
-        } catch {
-          errorMessage = error.localizedDescription
-          showingError = true
-        }
+  private func handleSavePanelResponse(
+    _ response: NSApplication.ModalResponse,
+    url: URL?,
+    format: ExportFormat,
+    quality: QualityPreset
+  ) {
+    guard response == .OK, let url else { return }
+
+    Task { @MainActor in
+      do {
+        let result = try await videoEngine.export(
+          asset: document.asset,
+          trimRange: trimState.trimRange,
+          format: format,
+          quality: quality,
+          outputURL: url,
+          sourceIsHEVC: document.isHEVC,
+          sourceURL: document.url,
+          sourceFileType: document.sourceFileType
+        )
+        exportResult = result
+        NSSound(named: "Glass")?.play()
+      } catch is CancellationError {
+        // User cancelled, do nothing
+      } catch ExportError.cancelled {
+        // Export cancelled
+      } catch {
+        errorMessage = error.localizedDescription
+        showingError = true
       }
     }
   }
@@ -380,8 +393,10 @@ struct ExportCompletionView: View {
         }
         .keyboardShortcut(.defaultAction)
         .buttonStyle(.borderedProminent)
+        .accessibilityIdentifier(AccessibilityID.doneButton)
       }
     }
     .padding(24)
+    .accessibilityIdentifier(AccessibilityID.completionView)
   }
 }

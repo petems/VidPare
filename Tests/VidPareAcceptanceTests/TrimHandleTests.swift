@@ -1,3 +1,5 @@
+import ApplicationServices
+import AXAutomation
 import XCTest
 
 final class TrimHandleTests: XCTestCase {
@@ -23,7 +25,7 @@ final class TrimHandleTests: XCTestCase {
       throw XCTSkip("Missing fixture: \(fixturePath)")
     }
 
-    pid = try launcher.launch(openingFile: fixturePath)
+    pid = try launcher.launch(environment: ["VIDPARE_OPEN_FILE": fixturePath])
   }
 
   override func tearDown() {

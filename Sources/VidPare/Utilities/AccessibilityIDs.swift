@@ -11,6 +11,8 @@ enum AccessibilityID {
 
   // TimelineView
   static let timeline = "vidpare.timeline"
+  static let startHandle = "vidpare.timeline.startHandle"
+  static let endHandle = "vidpare.timeline.endHandle"
   static let trimHandleStart = "vidpare.trimHandle.start"
   static let trimHandleEnd = "vidpare.trimHandle.end"
 
@@ -19,6 +21,8 @@ enum AccessibilityID {
   static let cancelButton = "vidpare.export.cancelButton"
   static let formatPicker = "vidpare.export.formatPicker"
   static let qualityPicker = "vidpare.export.qualityPicker"
+  static let completionView = "vidpare.export.completionView"
+  static let doneButton = "vidpare.export.doneButton"
 
   // Toolbar
   static let toolbarOpen = "vidpare.toolbar.open"
