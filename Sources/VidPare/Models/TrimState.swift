@@ -71,10 +71,12 @@ enum ExportFormat: String, CaseIterable, Identifiable {
     }
 
     var containerLabel: String {
-        switch fileType {
-        case .mov:
+        switch self {
+        case .movH264:
             return "MOV"
-        default:
+        case .gif:
+            return "GIF"
+        case .mp4H264, .mp4HEVC:
             return "MP4"
         }
     }
