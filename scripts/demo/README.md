@@ -22,7 +22,7 @@ This runs `DemoRecorder record` which:
 1. Launches VidPare with the source video auto-loaded via `VIDPARE_OPEN_FILE`
 2. Captures the app window using ScreenCaptureKit (Retina, 30fps, H.264, no audio)
 3. Runs the scripted UI scenario (playback → drag trim handles → export)
-4. Post-processes the recording (trims head/tail, scales, re-encodes)
+4. Post-processes the recording (trims head/tail, scales, re-encodes at target bitrate)
 5. Outputs `site/public/demo.mp4` and `site/public/demo-poster.jpg`
 
 ## Options
@@ -34,6 +34,7 @@ DemoRecorder record [options]
   --output <path>   Output MP4 path (default: site/public/demo.mp4)
   --poster <path>   Poster frame JPEG path (optional)
   --width <int>     Output width in pixels (default: 1920)
+  --bitrate <int>   Output video bitrate in bps (default: 5000000)
   --fps <int>       Recording frame rate (default: 30)
 ```
 

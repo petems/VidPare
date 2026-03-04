@@ -86,14 +86,20 @@ struct DemoScenario {
       throw ScenarioError.elementNotFound("vidpare.timeline")
     }
     guard
-      let startHandle = findElement(withIdentifier: "vidpare.timeline.startHandle", in: window)
-        ?? findElement(withIdentifier: "vidpare.trimHandle.start", in: window)
+      let startHandle = findTrimHandle(
+        in: window,
+        primaryIdentifier: "vidpare.timeline.startHandle",
+        legacyIdentifier: "vidpare.trimHandle.start"
+      )
     else {
       throw ScenarioError.elementNotFound("vidpare.timeline.startHandle")
     }
     guard
-      let endHandle = findElement(withIdentifier: "vidpare.timeline.endHandle", in: window)
-        ?? findElement(withIdentifier: "vidpare.trimHandle.end", in: window)
+      let endHandle = findTrimHandle(
+        in: window,
+        primaryIdentifier: "vidpare.timeline.endHandle",
+        legacyIdentifier: "vidpare.trimHandle.end"
+      )
     else {
       throw ScenarioError.elementNotFound("vidpare.timeline.endHandle")
     }
@@ -105,6 +111,15 @@ struct DemoScenario {
     // Drag end handle to ~7s mark (7/14 = 0.50)
     try dragTrimHandle(handle: endHandle, timeline: timeline, toFraction: 7.0 / 14.0)
     sleep(for: 1.0)
+  }
+
+  private func findTrimHandle(
+    in window: AXUIElement,
+    primaryIdentifier: String,
+    legacyIdentifier: String
+  ) -> AXUIElement? {
+    findElement(withIdentifier: primaryIdentifier, in: window)
+      ?? findElement(withIdentifier: legacyIdentifier, in: window)
   }
 
   private func dragTrimHandle(

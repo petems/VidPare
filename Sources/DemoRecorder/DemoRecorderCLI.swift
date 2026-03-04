@@ -4,6 +4,7 @@ import Foundation
 
 @main
 struct DemoRecorderCLI {
+  /// Entrypoint for the `DemoRecorder` command-line tool.
   static func main() async throws {
     let args = CommandLine.arguments
 
@@ -24,6 +25,7 @@ struct DemoRecorderCLI {
     }
   }
 
+  /// Prints command usage and supported options.
   static func printUsage() {
     print(
       """
@@ -34,10 +36,12 @@ struct DemoRecorderCLI {
         --output <path>   Path for the output MP4 (default: site/public/demo.mp4)
         --poster <path>   Path for the poster frame JPEG (optional)
         --width <int>     Output video width in pixels (default: 1920)
+        --bitrate <int>   Output video bitrate in bps (default: 5000000)
         --fps <int>       Recording frame rate (default: 30)
       """)
   }
 
+  /// Executes the record command from parsed CLI arguments.
   static func runRecord(args: [String]) async throws {
     let config = try parseRecordArgs(args)
     validatePreconditions(config: config)
@@ -45,6 +49,7 @@ struct DemoRecorderCLI {
     print("DemoRecorder: Starting demo recording...")
     print("  Source video: \(config.resolvedSource)")
     print("  Output: \(config.resolvedOutput)")
+    print("  Target bitrate: \(config.targetBitrate) bps")
     if let poster = config.resolvedPoster {
       print("  Poster: \(poster)")
     }
@@ -97,26 +102,23 @@ struct RecordConfig {
   let resolvedOutput: String
   let resolvedPoster: String?
   let outputWidth: Int
+  let targetBitrate: Int
   let fps: Int
 }
 
+/// Parses `record` command options into a fully resolved configuration.
 private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
   var sourceVideoPath: String?
   var outputPath = "site/public/demo.mp4"
   var posterPath: String?
   var outputWidth = 1920
+  var targetBitrate = 5_000_000
   var fps = 30
 
   var i = 0
   while i < args.count {
     let option = args[i]
-
-    guard i + 1 < args.count else {
-      print("Error: Missing value for option '\(option)'.")
-      DemoRecorderCLI.printUsage()
-      exit(1)
-    }
-    let value = args[i + 1]
+    let value = optionValue(args: args, index: i, option: option)
 
     switch option {
     case "--source":
@@ -126,21 +128,22 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
     case "--poster":
       posterPath = value
     case "--width":
-      outputWidth = Int(value) ?? 1920
+      outputWidth = parsePositiveIntOption(value: value, option: "--width")
+    case "--bitrate":
+      targetBitrate = parseIntOption(value: value, option: "--bitrate")
     case "--fps":
-      fps = Int(value) ?? 30
+      fps = parsePositiveIntOption(value: value, option: "--fps")
     default:
-      print("Unknown option: \(option)")
-      DemoRecorderCLI.printUsage()
-      exit(1)
+      failRecordArg("Unknown option: \(option)")
     }
     i += 2
   }
 
   guard let sourceVideoPath else {
-    print("Error: --source is required.")
-    DemoRecorderCLI.printUsage()
-    exit(1)
+    failRecordArg("--source is required.")
+  }
+  guard targetBitrate > 0 else {
+    failRecordArg("--bitrate must be greater than 0.")
   }
 
   let cwd = FileManager.default.currentDirectoryPath
@@ -149,15 +152,50 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
     resolvedOutput: resolvePath(outputPath, cwd: cwd),
     resolvedPoster: posterPath.map { resolvePath($0, cwd: cwd) },
     outputWidth: outputWidth,
+    targetBitrate: targetBitrate,
     fps: fps
   )
 }
 
+/// Returns the value associated with a CLI option at `index` or exits with usage text.
+private func optionValue(args: [String], index: Int, option: String) -> String {
+  guard index + 1 < args.count else {
+    failRecordArg("Missing value for option '\(option)'.")
+  }
+  return args[index + 1]
+}
+
+/// Parses an integer argument value for a named CLI option.
+private func parseIntOption(value: String, option: String) -> Int {
+  guard let parsedValue = Int(value) else {
+    failRecordArg("\(option) value '\(value)' is not a valid integer.")
+  }
+  return parsedValue
+}
+
+/// Parses a strictly positive integer argument value for a named CLI option.
+private func parsePositiveIntOption(value: String, option: String) -> Int {
+  let parsedValue = parseIntOption(value: value, option: option)
+  guard parsedValue > 0 else {
+    failRecordArg("\(option) must be greater than 0.")
+  }
+  return parsedValue
+}
+
+/// Prints a parse error with usage text, then exits.
+private func failRecordArg(_ message: String) -> Never {
+  print("Error: \(message)")
+  DemoRecorderCLI.printUsage()
+  exit(1)
+}
+
+/// Resolves an input path against the current working directory.
 private func resolvePath(_ path: String, cwd: String) -> String {
   URL(fileURLWithPath: path, relativeTo: URL(fileURLWithPath: cwd, isDirectory: true))
     .standardized.path
 }
 
+/// Verifies source input exists and accessibility permissions are granted.
 private func validatePreconditions(config: RecordConfig) {
   guard FileManager.default.fileExists(atPath: config.resolvedSource) else {
     print("Error: Source video not found at '\(config.resolvedSource)'.")
@@ -173,6 +211,7 @@ private func validatePreconditions(config: RecordConfig) {
 
 // MARK: - Window Discovery
 
+/// Locates the front VidPare content window and returns its CGWindowID.
 private func findWindowID(pid: pid_t) throws -> CGWindowID {
   print("[1/5] Launching VidPare...")
   let app = axApp(for: pid)
@@ -208,6 +247,7 @@ private func findWindowID(pid: pid_t) throws -> CGWindowID {
 
 // MARK: - Cleanup
 
+/// Removes old `*_trimmed` artifacts to avoid save-panel overwrite prompts.
 private func cleanupTrimmedFiles(sourceVideoPath: String) {
   let sourceURL = URL(fileURLWithPath: sourceVideoPath)
   let baseName = sourceURL.deletingPathExtension().lastPathComponent
@@ -238,6 +278,7 @@ private func cleanupTrimmedFiles(sourceVideoPath: String) {
 
 // MARK: - Post-Processing
 
+/// Runs the final scaling/encoding/poster extraction step for the recording.
 private func postProcess(rawURL: URL, config: RecordConfig) async throws {
   let finalOutputURL = URL(fileURLWithPath: config.resolvedOutput)
   let posterURL = config.resolvedPoster.map { URL(fileURLWithPath: $0) }
@@ -246,7 +287,8 @@ private func postProcess(rawURL: URL, config: RecordConfig) async throws {
     inputURL: rawURL,
     outputURL: finalOutputURL,
     posterURL: posterURL,
-    targetWidth: config.outputWidth
+    targetWidth: config.outputWidth,
+    targetBitrate: config.targetBitrate
   )
   try await processor.process()
 }
