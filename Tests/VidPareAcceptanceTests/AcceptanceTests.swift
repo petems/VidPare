@@ -67,6 +67,27 @@ final class AcceptanceTests: XCTestCase {
     XCTAssertTrue(success, "Should find an Open File button on launch")
   }
 
+  func testAppLaunches_hasToolbarOpenButton() {
+    let app = axApp(for: pid)
+
+    var toolbarButton: AXUIElement?
+    let found = waitFor {
+      guard let window = axWindows(of: app).first else { return false }
+      if let btn = findElement(withIdentifier: "vidpare.toolbar.open", in: window) {
+        toolbarButton = btn
+        return true
+      }
+      let buttons = findElements(withRole: kAXButtonRole as String, in: window)
+      toolbarButton = buttons.first { btn in
+        let desc = axDescription(of: btn) ?? ""
+        return desc == "Open"
+      }
+      return toolbarButton != nil
+    }
+    XCTAssertTrue(found, "Should find toolbar Open button")
+    XCTAssertNotNil(toolbarButton)
+  }
+
   // MARK: - Export Filename Editability
 
   func testExport_savePanelFilenameIsEditable() throws {
