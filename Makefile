@@ -142,9 +142,10 @@ demo: demo-record ## Record demo and verify output exists
 
 .PHONY: screenshots
 screenshots: build ## Capture app snapshots and refresh docs screenshots
-	./scripts/screenshots/capture-launch-screenshot.sh "$(SCREENSHOT_DIR)/main-content-view.png"
-	SNAPSHOT_TESTING_RECORD=1 swift test --filter SnapshotTests $(V_FLAG)
 	@mkdir -p "$(SCREENSHOT_DIR)"
+	./scripts/screenshots/capture-launch-screenshot.sh "$(SCREENSHOT_DIR)/main-content-view.png"
+	$(MAKE) test-record-snapshots
+	$(MAKE) test-snapshots
 	@cp "$(SNAPSHOT_DIR)/testPlayerControls_paused.1.png" "$(SCREENSHOT_DIR)/player-controls-paused.png"
 	@cp "$(SNAPSHOT_DIR)/testPlayerControls_playing.1.png" "$(SCREENSHOT_DIR)/player-controls-playing.png"
 	@cp "$(SNAPSHOT_DIR)/testTimelineView_noThumbnails.1.png" "$(SCREENSHOT_DIR)/timeline-no-thumbnails.png"
