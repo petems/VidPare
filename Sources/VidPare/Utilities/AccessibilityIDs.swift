@@ -6,6 +6,7 @@ enum AccessibilityID {
 
   // PlayerControlsView
   static let playPauseButton = "vidpare.playPause"
+  static let soundToggleButton = "vidpare.soundToggle"
   static let inPointButton = "vidpare.inPoint"
   static let outPointButton = "vidpare.outPoint"
 
@@ -20,6 +21,7 @@ enum AccessibilityID {
   // ExportSheet
   static let exportButton = "vidpare.export.exportButton"
   static let cancelButton = "vidpare.export.cancelButton"
+  static let exportToneToggleButton = "vidpare.export.toneToggle"
   static let formatPicker = "vidpare.export.formatPicker"
   static let qualityPicker = "vidpare.export.qualityPicker"
   static let completionView = "vidpare.export.completionView"
