@@ -33,8 +33,9 @@ public func axSmoothMoveCursor(
   to end: CGPoint,
   duration: TimeInterval
 ) {
-  let steps = max(Int(duration * 60), 10)
-  let stepDelay = duration / Double(steps)
+  let safeDuration = max(0, duration)
+  let steps = max(Int(safeDuration * 60), 10)
+  let stepDelay = safeDuration / Double(steps)
 
   for step in 1...steps {
     let progress = Double(step) / Double(steps)
@@ -58,22 +59,22 @@ public func axSmoothMoveCursor(
 /// Post a left mouse click at an absolute screen point.
 @discardableResult
 public func axPostMouseClick(at point: CGPoint) -> Bool {
-  let mouseDown = CGEvent(
-    mouseEventSource: sharedEventSource,
-    mouseType: .leftMouseDown,
-    mouseCursorPosition: point,
-    mouseButton: .left
-  )
-  guard let mouseDown else { return false }
-  mouseDown.post(tap: .cghidEventTap)
+  guard
+    let mouseDown = CGEvent(
+      mouseEventSource: sharedEventSource,
+      mouseType: .leftMouseDown,
+      mouseCursorPosition: point,
+      mouseButton: .left
+    ),
+    let mouseUp = CGEvent(
+      mouseEventSource: sharedEventSource,
+      mouseType: .leftMouseUp,
+      mouseCursorPosition: point,
+      mouseButton: .left
+    )
+  else { return false }
 
-  let mouseUp = CGEvent(
-    mouseEventSource: sharedEventSource,
-    mouseType: .leftMouseUp,
-    mouseCursorPosition: point,
-    mouseButton: .left
-  )
-  guard let mouseUp else { return false }
+  mouseDown.post(tap: .cghidEventTap)
   mouseUp.post(tap: .cghidEventTap)
   return true
 }
@@ -92,22 +93,44 @@ public func axMoveAndClick(_ element: AXUIElement, duration: TimeInterval = 0.25
 }
 
 /// Simulate a smooth mouse drag from one point to another.
+@discardableResult
 public func axDrag(
   from start: CGPoint,
   to end: CGPoint,
   duration: TimeInterval = 0.35
-) {
-  let mouseDown = CGEvent(
+) -> Bool {
+  func postMouseUp(at point: CGPoint) -> Bool {
+    let mouseUp =
+      CGEvent(
+        mouseEventSource: sharedEventSource,
+        mouseType: .leftMouseUp,
+        mouseCursorPosition: point,
+        mouseButton: .left
+      )
+      ?? CGEvent(
+        mouseEventSource: nil,
+        mouseType: .leftMouseUp,
+        mouseCursorPosition: point,
+        mouseButton: .left
+      )
+    guard let mouseUp else { return false }
+    mouseUp.post(tap: .cghidEventTap)
+    return true
+  }
+
+  guard let mouseDown = CGEvent(
     mouseEventSource: sharedEventSource,
     mouseType: .leftMouseDown,
     mouseCursorPosition: start,
     mouseButton: .left
-  )
-  mouseDown?.post(tap: .cghidEventTap)
+  ) else { return false }
+
+  mouseDown.post(tap: .cghidEventTap)
   Thread.sleep(forTimeInterval: 0.05)
 
-  let steps = max(Int(duration * 60), 10)
-  let stepDelay = duration / Double(steps)
+  let safeDuration = max(0, duration)
+  let steps = max(Int(safeDuration * 60), 10)
+  let stepDelay = safeDuration / Double(steps)
   for step in 1...steps {
     let progress = Double(step) / Double(steps)
     let ease = progress * progress * (3.0 - 2.0 * progress)
@@ -116,23 +139,20 @@ public func axDrag(
       y: start.y + CGFloat(ease) * (end.y - start.y)
     )
 
-    let drag = CGEvent(
+    guard let drag = CGEvent(
       mouseEventSource: sharedEventSource,
       mouseType: .leftMouseDragged,
       mouseCursorPosition: point,
       mouseButton: .left
-    )
-    drag?.post(tap: .cghidEventTap)
+    ) else {
+      _ = postMouseUp(at: point)
+      return false
+    }
+    drag.post(tap: .cghidEventTap)
     Thread.sleep(forTimeInterval: stepDelay)
   }
 
-  let mouseUp = CGEvent(
-    mouseEventSource: sharedEventSource,
-    mouseType: .leftMouseUp,
-    mouseCursorPosition: end,
-    mouseButton: .left
-  )
-  mouseUp?.post(tap: .cghidEventTap)
+  return postMouseUp(at: end)
 }
 
 /// Dump the AX tree rooted at an element for debugging flaky selector issues.
