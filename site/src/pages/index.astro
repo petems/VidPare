@@ -7,7 +7,6 @@ import { faqs, featureItems } from '../content/features';
 <MainLayout>
   <main id="top">
     <header class="site-header">
-      <a class="brand" href="#top">{siteConfig.appName}</a>
       <nav>
         <a href="#features">Features</a>
         <a href="#tech">Tech</a>
@@ -15,7 +14,8 @@ import { faqs, featureItems } from '../content/features';
       </nav>
     </header>
 
-    <section class="hero surface reveal">
+    <section id="hero" class="hero surface reveal">
+      <p class="hero-brand">{siteConfig.appName}</p>
       <p class="eyebrow">Native macOS video trimmer</p>
       <h1>{siteConfig.heroTitle}</h1>
       <p class="lede">{siteConfig.heroSubtitle}</p>
