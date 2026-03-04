@@ -236,27 +236,23 @@ struct DemoScenario {
 
     // Wait for export to complete (completion view may appear in main window or sheet window)
     let exportCompleted = waitFor(timeout: 30.0, interval: 0.5) {
-      for win in axWindows(of: app) {
-        if findElement(withIdentifier: "vidpare.export.completionView", in: win) != nil {
-          return true
-        }
+      axWindows(of: app).contains {
+        findElement(withIdentifier: "vidpare.export.completionView", in: $0) != nil
       }
-      return false
     }
 
-    if exportCompleted {
-      sleep(for: 2.0)
-      // Click Done to dismiss the completion view (search all windows for sheet case)
-      for win in axWindows(of: app) {
-        if let doneBtn = findElement(withIdentifier: "vidpare.export.doneButton", in: win) {
-          moveAndClick(doneBtn)
-          break
-        }
-      }
-      sleep(for: 0.5)
-    } else {
-      sleep(for: 3.0)
+    guard exportCompleted else {
+      throw ScenarioError.exportDidNotComplete
     }
+    sleep(for: 2.0)
+    // Click Done to dismiss the completion view (search all windows for sheet case)
+    for win in axWindows(of: app) {
+      if let doneBtn = findElement(withIdentifier: "vidpare.export.doneButton", in: win) {
+        moveAndClick(doneBtn)
+        break
+      }
+    }
+    sleep(for: 0.5)
   }
 
   // MARK: - Save Panel
@@ -380,8 +376,10 @@ struct DemoScenario {
     if !id.isEmpty { parts.append("id=\"\(id)\"") }
     if !title.isEmpty { parts.append("title=\"\(title)\"") }
     if !desc.isEmpty { parts.append("desc=\"\(desc)\"") }
-    if depth == 0 { FileHandle.standardError.write("  AX tree dump (\(label)):\n".data(using: .utf8)!) }
-    FileHandle.standardError.write((parts.joined(separator: " ") + "\n").data(using: .utf8)!)
+    if depth == 0 {
+      FileHandle.standardError.write(Data("  AX tree dump (\(label)):\n".utf8))
+    }
+    FileHandle.standardError.write(Data((parts.joined(separator: " ") + "\n").utf8))
     if depth < 12 {
       for child in axChildren(of: element) {
         dumpTree(element: child, label: label, depth: depth + 1)
@@ -396,6 +394,7 @@ enum ScenarioError: Error, CustomStringConvertible {
   case sheetNotAppeared(String)
   case videoDidNotLoad
   case cannotGetElementFrame(String)
+  case exportDidNotComplete
 
   var description: String {
     switch self {
@@ -404,6 +403,7 @@ enum ScenarioError: Error, CustomStringConvertible {
     case .sheetNotAppeared(let name): return "\(name) did not appear."
     case .videoDidNotLoad: return "Video did not load into the editor."
     case .cannotGetElementFrame(let name): return "Cannot get frame for element: \(name)"
+    case .exportDidNotComplete: return "Export did not complete within timeout."
     }
   }
 }

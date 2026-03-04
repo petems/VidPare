@@ -64,9 +64,15 @@ struct DemoRecorderCLI {
     let recorder = WindowRecorder(outputURL: rawOutputURL)
     try await recorder.start(windowID: windowID, fps: config.fps)
 
-    print("[3/5] Running demo scenario...")
-    let scenario = DemoScenario(pid: pid)
-    try scenario.run()
+    do {
+      print("[3/5] Running demo scenario...")
+      let scenario = DemoScenario(pid: pid)
+      try scenario.run()
+    } catch {
+      print("Scenario failed: \(error). Stopping recording...")
+      _ = try? await recorder.stop()
+      throw error
+    }
 
     print("[4/5] Stopping recording...")
     let rawURL = try await recorder.stop()
@@ -103,28 +109,32 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
 
   var i = 0
   while i < args.count {
-    switch args[i] {
-    case "--source":
-      i += 1
-      sourceVideoPath = args[i]
-    case "--output":
-      i += 1
-      outputPath = args[i]
-    case "--poster":
-      i += 1
-      posterPath = args[i]
-    case "--width":
-      i += 1
-      outputWidth = Int(args[i]) ?? 1920
-    case "--fps":
-      i += 1
-      fps = Int(args[i]) ?? 30
-    default:
-      print("Unknown option: \(args[i])")
+    let option = args[i]
+
+    guard i + 1 < args.count else {
+      print("Error: Missing value for option '\(option)'.")
       DemoRecorderCLI.printUsage()
       exit(1)
     }
-    i += 1
+    let value = args[i + 1]
+
+    switch option {
+    case "--source":
+      sourceVideoPath = value
+    case "--output":
+      outputPath = value
+    case "--poster":
+      posterPath = value
+    case "--width":
+      outputWidth = Int(value) ?? 1920
+    case "--fps":
+      fps = Int(value) ?? 30
+    default:
+      print("Unknown option: \(option)")
+      DemoRecorderCLI.printUsage()
+      exit(1)
+    }
+    i += 2
   }
 
   guard let sourceVideoPath else {
@@ -144,7 +154,8 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
 }
 
 private func resolvePath(_ path: String, cwd: String) -> String {
-  path.hasPrefix("/") ? path : cwd + "/" + path
+  URL(fileURLWithPath: path, relativeTo: URL(fileURLWithPath: cwd, isDirectory: true))
+    .standardized.path
 }
 
 private func validatePreconditions(config: RecordConfig) {
@@ -200,9 +211,8 @@ private func findWindowID(pid: pid_t) throws -> CGWindowID {
 private func cleanupTrimmedFiles(sourceVideoPath: String) {
   let sourceURL = URL(fileURLWithPath: sourceVideoPath)
   let baseName = sourceURL.deletingPathExtension().lastPathComponent
-  let trimmedPattern = "\(baseName)_trimmed"
+  let videoExtensions: Set<String> = ["mp4", "mov", "m4v"]
 
-  // Check the source directory and common save locations
   let sourceDir = sourceURL.deletingLastPathComponent().path
   let desktopDir = FileManager.default.homeDirectoryForCurrentUser
     .appendingPathComponent("Desktop").path
@@ -212,7 +222,13 @@ private func cleanupTrimmedFiles(sourceVideoPath: String) {
   let fm = FileManager.default
   for dir in Set([sourceDir, desktopDir, downloadsDir]) {
     guard let files = try? fm.contentsOfDirectory(atPath: dir) else { continue }
-    for file in files where file.hasPrefix(trimmedPattern) {
+    for file in files {
+      let fileURL = URL(fileURLWithPath: file)
+      let name = fileURL.deletingPathExtension().lastPathComponent
+      let ext = fileURL.pathExtension.lowercased()
+      guard videoExtensions.contains(ext),
+        name == "\(baseName)_trimmed" || name.hasPrefix("\(baseName)_trimmed ")
+      else { continue }
       let fullPath = (dir as NSString).appendingPathComponent(file)
       try? fm.removeItem(atPath: fullPath)
       print("  Cleaned up: \(fullPath)")

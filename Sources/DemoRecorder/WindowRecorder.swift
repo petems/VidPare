@@ -66,6 +66,9 @@ final class WindowRecorder: NSObject, SCStreamOutput {
 
     let input = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
     input.expectsMediaDataInRealTime = true
+    guard writer.canAdd(input) else {
+      throw RecorderError.writeFailed
+    }
     writer.add(input)
 
     self.assetWriter = writer

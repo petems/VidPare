@@ -122,18 +122,18 @@ demo-record: build ## Record a fresh demo MP4 (requires Screen Recording + Acces
 		{ echo "Error: Accessibility permissions not granted." >&2; \
 		  echo "Add your terminal to System Settings > Privacy & Security > Accessibility." >&2; \
 		  exit 1; }
-	@test -f $(DEMO_SRC_VIDEO) || \
+	@test -f "$(DEMO_SRC_VIDEO)" || \
 		{ echo "Error: Source video not found at $(DEMO_SRC_VIDEO)." >&2; \
 		  echo "Place your demo source video at that path." >&2; \
 		  exit 1; }
-	VIDPARE_BINARY=$(DEBUG_BIN) swift run DemoRecorder record \
-		--source $(DEMO_SRC_VIDEO) \
-		--output $(DEMO_OUTPUT) \
-		--poster $(DEMO_POSTER)
+	VIDPARE_BINARY="$(DEBUG_BIN)" swift run DemoRecorder record \
+		--source "$(DEMO_SRC_VIDEO)" \
+		--output "$(DEMO_OUTPUT)" \
+		--poster "$(DEMO_POSTER)"
 
 .PHONY: demo
 demo: demo-record ## Record demo and verify output exists
-	@test -f $(DEMO_OUTPUT) && echo "Demo recorded: $(DEMO_OUTPUT)" || \
+	@test -f "$(DEMO_OUTPUT)" && echo "Demo recorded: $(DEMO_OUTPUT)" || \
 		{ echo "Error: Demo recording failed." >&2; exit 1; }
 
 # ── Site ─────────────────────────────────────────────────────────────

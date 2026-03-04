@@ -87,7 +87,7 @@ public func pressButton(_ element: AXUIElement) -> Bool {
 public func axEnabled(of element: AXUIElement) -> Bool {
   var value: CFTypeRef?
   let result = AXUIElementCopyAttributeValue(element, kAXEnabledAttribute as CFString, &value)
-  guard result == .success, let boolVal = value as? Bool else { return true }
+  guard result == .success, let boolVal = value as? Bool else { return false }
   return boolVal
 }
 
@@ -154,13 +154,10 @@ public func axPosition(of element: AXUIElement) -> CGPoint? {
   var value: CFTypeRef?
   let result = AXUIElementCopyAttributeValue(element, kAXPositionAttribute as CFString, &value)
   guard result == .success, let val = value else { return nil }
-  // swiftlint:disable:next force_cast
-  let axValue = val as! AXValue
+  let axVal = unsafeBitCast(val, to: AXValue.self)
   var point = CGPoint.zero
-  if AXValueGetValue(axValue, .cgPoint, &point) {
-    return point
-  }
-  return nil
+  guard AXValueGetValue(axVal, .cgPoint, &point) else { return nil }
+  return point
 }
 
 /// Read a CGSize attribute (e.g., kAXSizeAttribute).
@@ -168,13 +165,10 @@ public func axSize(of element: AXUIElement) -> CGSize? {
   var value: CFTypeRef?
   let result = AXUIElementCopyAttributeValue(element, kAXSizeAttribute as CFString, &value)
   guard result == .success, let val = value else { return nil }
-  // swiftlint:disable:next force_cast
-  let axValue = val as! AXValue
+  let axVal = unsafeBitCast(val, to: AXValue.self)
   var size = CGSize.zero
-  if AXValueGetValue(axValue, .cgSize, &size) {
-    return size
-  }
-  return nil
+  guard AXValueGetValue(axVal, .cgSize, &size) else { return nil }
+  return size
 }
 
 /// Wait for a condition to become true, polling at intervals.

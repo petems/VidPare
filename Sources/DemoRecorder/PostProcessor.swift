@@ -33,8 +33,13 @@ struct PostProcessor {
     }
 
     let naturalSize = try await videoTrack.load(.naturalSize)
+    let preferredTransform = try await videoTrack.load(.preferredTransform)
     let (composition, videoComposition) = try buildComposition(
-      videoTrack: videoTrack, duration: duration, naturalSize: naturalSize)
+      videoTrack: videoTrack,
+      duration: duration,
+      naturalSize: naturalSize,
+      preferredTransform: preferredTransform
+    )
 
     try await exportComposition(composition, videoComposition: videoComposition)
 
@@ -47,15 +52,25 @@ struct PostProcessor {
   private func buildComposition(
     videoTrack: AVAssetTrack,
     duration: CMTime,
-    naturalSize: CGSize
+    naturalSize: CGSize,
+    preferredTransform: CGAffineTransform
   ) throws -> (AVMutableComposition, AVMutableVideoComposition) {
     let aspectRatio = naturalSize.height / naturalSize.width
     let targetHeight = Int(CGFloat(targetWidth) * aspectRatio)
     let outputWidth = targetWidth % 2 == 0 ? targetWidth : targetWidth + 1
     let outputHeight = targetHeight % 2 == 0 ? targetHeight : targetHeight + 1
 
-    let trimStart = CMTime(seconds: 0.5, preferredTimescale: 600)
-    let trimEnd = CMTimeSubtract(duration, CMTime(seconds: 0.5, preferredTimescale: 600))
+    let trimMargin = CMTime(seconds: 0.5, preferredTimescale: 600)
+    let trimStart: CMTime
+    let trimEnd: CMTime
+
+    if CMTimeCompare(duration, CMTime(seconds: 1.5, preferredTimescale: 600)) <= 0 {
+      trimStart = .zero
+      trimEnd = duration
+    } else {
+      trimStart = trimMargin
+      trimEnd = CMTimeSubtract(duration, trimMargin)
+    }
     let trimRange = CMTimeRange(start: trimStart, end: trimEnd)
 
     let composition = AVMutableComposition()
@@ -72,12 +87,16 @@ struct PostProcessor {
     videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
 
     let instruction = AVMutableVideoCompositionInstruction()
-    instruction.timeRange = CMTimeRange(start: .zero, duration: CMTimeSubtract(trimEnd, trimStart))
+    instruction.timeRange = CMTimeRange(
+      start: .zero, duration: CMTimeSubtract(trimEnd, trimStart))
 
-    let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionTrack)
+    let layerInstruction = AVMutableVideoCompositionLayerInstruction(
+      assetTrack: compositionTrack)
     let scaleX = CGFloat(outputWidth) / naturalSize.width
     let scaleY = CGFloat(outputHeight) / naturalSize.height
-    layerInstruction.setTransform(CGAffineTransform(scaleX: scaleX, y: scaleY), at: .zero)
+    let scaleTransform = CGAffineTransform(scaleX: scaleX, y: scaleY)
+    let combinedTransform = preferredTransform.concatenating(scaleTransform)
+    layerInstruction.setTransform(combinedTransform, at: .zero)
     instruction.layerInstructions = [layerInstruction]
     videoComposition.instructions = [instruction]
 
@@ -98,27 +117,26 @@ struct PostProcessor {
     print(
       "  Post-process render size: \(Int(renderSize.width))x\(Int(renderSize.height))")
 
-    // Try with video composition first; fall back to passthrough if -16122 occurs
+    // Try HighestQuality with video composition first
     if let result = try? await exportWith(
-      asset: composition, videoComposition: videoComposition, preset: AVAssetExportPresetHighestQuality
+      asset: composition,
+      videoComposition: videoComposition,
+      preset: AVAssetExportPresetHighestQuality
     ) {
       if result { return }
     }
 
-    print("  HighestQuality preset failed, trying without video composition...")
-    guard
-      let exportSession = AVAssetExportSession(
-        asset: composition, presetName: AVAssetExportPresetPassthrough)
-    else {
-      throw PostProcessorError.exportSessionFailed
+    // Fall back to 1920x1080 preset (still applies video composition scaling)
+    print("  HighestQuality preset failed, trying 1920x1080 preset...")
+    if let result = try? await exportWith(
+      asset: composition,
+      videoComposition: videoComposition,
+      preset: AVAssetExportPreset1920x1080
+    ) {
+      if result { return }
     }
-    exportSession.outputURL = outputURL
-    exportSession.outputFileType = .mp4
 
-    await exportSession.export()
-    guard exportSession.status == .completed else {
-      throw exportSession.error ?? PostProcessorError.exportFailed
-    }
+    throw PostProcessorError.exportFailed
   }
 
   private func exportWith(

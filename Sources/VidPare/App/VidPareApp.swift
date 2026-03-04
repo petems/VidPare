@@ -12,7 +12,9 @@ struct VidPareApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
   private var initialFileURL: URL? {
-    if let path = ProcessInfo.processInfo.environment["VIDPARE_OPEN_FILE"] {
+    if let path = ProcessInfo.processInfo.environment["VIDPARE_OPEN_FILE"],
+      !path.isEmpty,
+      FileManager.default.fileExists(atPath: path) {
       return URL(fileURLWithPath: path)
     }
     return nil
