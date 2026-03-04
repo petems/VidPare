@@ -1,4 +1,4 @@
-import AppKit
+import ApplicationServices
 import Foundation
 
 final class AppLauncher {
@@ -20,9 +20,13 @@ final class AppLauncher {
     try proc.run()
     self.process = proc
 
-    // Wait for the app to register with the window server
-    Thread.sleep(forTimeInterval: 2.0)
-    return proc.processIdentifier
+    let pid = proc.processIdentifier
+    let app = axApp(for: pid)
+    let ready = waitFor(timeout: 10.0) { !axWindows(of: app).isEmpty }
+    if !ready {
+      throw AppLauncherError.appDidNotLaunch
+    }
+    return pid
   }
 
   func terminate() {
@@ -35,11 +39,14 @@ final class AppLauncher {
 
 enum AppLauncherError: Error, CustomStringConvertible {
   case binaryNotFound(String)
+  case appDidNotLaunch
 
   var description: String {
     switch self {
     case .binaryNotFound(let path):
       return "VidPare binary not found at '\(path)'. Run 'swift build' first."
+    case .appDidNotLaunch:
+      return "VidPare launched but no window appeared within timeout."
     }
   }
 }
