@@ -20,7 +20,7 @@ Native macOS video trimmer built with Swift, SwiftUI, and AVFoundation. Uses har
 ## Dependencies
 
 ```sh
-brew install swift-format swiftlint
+brew install swift-format swiftlint pre-commit
 ```
 
 ## Development Commands
@@ -40,6 +40,18 @@ brew install swift-format swiftlint
   - `swiftlint` - Lint it
   - `swift test` - Run unit tests
   - Where possible this should be done to avoid breaking the build!
+
+### Git Hooks (pre-commit)
+
+- `make install-hooks` — Install pre-commit hooks (run once after clone)
+- `make run-hooks` — Run all hooks against all files
+- `make uninstall-hooks` — Remove hooks
+- Hooks run automatically on `git commit` and `git push`:
+  - **pre-commit stage**: SwiftLint, swift-format check, trailing whitespace, YAML/JSON validation, large file check, merge conflict markers
+  - **commit-msg stage**: Conventional Commits format validation
+  - **pre-push stage**: unit + snapshot tests (`swift test --skip VidPareAcceptanceTests`)
+- Pre-commit hooks are fast (< 2s) and only check staged files
+- CI remains the authoritative quality gate; hooks catch easy issues early
 
 ### Product Website (`site/`)
 

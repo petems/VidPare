@@ -166,4 +166,3 @@ jobs:
           name: VidPare-release-macos${{ matrix.macos }}
           path: .build/release/VidPare
           retention-days: 7
-
