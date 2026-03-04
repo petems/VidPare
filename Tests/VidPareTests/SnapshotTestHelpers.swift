@@ -3,6 +3,11 @@ import SnapshotTesting
 import SwiftUI
 import XCTest
 
+/// True when running inside a CI environment (GitHub Actions, etc.)
+var isCI: Bool {
+  ProcessInfo.processInfo.environment["CI"] != nil
+}
+
 @MainActor
 func snapshotView<V: View>(
   _ view: V,
@@ -11,7 +16,11 @@ func snapshotView<V: View>(
   file: StaticString = #file,
   testName: String = #function,
   line: UInt = #line
-) {
+) throws {
+  if isCI {
+    throw XCTSkip("Snapshot tests are local-only (rendering varies across machines)")
+  }
+
   let hostingView = NSHostingView(rootView: view)
   hostingView.frame = NSRect(origin: .zero, size: size)
   hostingView.appearance = NSAppearance(named: .aqua)
