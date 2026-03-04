@@ -27,6 +27,13 @@ func axTitle(of element: AXUIElement) -> String? {
   return value as? String
 }
 
+func axDescription(of element: AXUIElement) -> String? {
+  var value: CFTypeRef?
+  let result = AXUIElementCopyAttributeValue(element, kAXDescriptionAttribute as CFString, &value)
+  guard result == .success else { return nil }
+  return value as? String
+}
+
 func axRole(of element: AXUIElement) -> String? {
   var value: CFTypeRef?
   let result = AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &value)
