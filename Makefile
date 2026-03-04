@@ -134,6 +134,26 @@ clean: ## Remove build artifacts
 resolve: ## Resolve package dependencies
 	swift package resolve
 
+# ── Git Hooks ───────────────────────────────────────────────────────
+
+.PHONY: install-hooks
+install-hooks: ## Install pre-commit git hooks
+	@command -v pre-commit >/dev/null 2>&1 || { echo "Install pre-commit: brew install pre-commit" >&2; exit 1; }
+	pre-commit install --install-hooks
+	pre-commit install --hook-type commit-msg
+	pre-commit install --hook-type pre-push
+	@echo "Pre-commit hooks installed."
+
+.PHONY: uninstall-hooks
+uninstall-hooks: ## Remove pre-commit git hooks
+	pre-commit uninstall
+	pre-commit uninstall --hook-type commit-msg
+	pre-commit uninstall --hook-type pre-push
+
+.PHONY: run-hooks
+run-hooks: ## Run all pre-commit hooks against all files
+	pre-commit run --all-files
+
 .PHONY: all
 all: check ## Alias for check (tool compatibility)
 
