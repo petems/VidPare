@@ -198,11 +198,14 @@ struct ExportSheet: View {
         }
       } else {
         HStack {
-          Button(action: { isExportToneEnabled.toggle() }) {
-            Image(systemName: isExportToneEnabled ? "bell.fill" : "bell.slash.fill")
-              .font(.title3)
-              .frame(width: 28, height: 28)
-          }
+          Button(
+            action: { isExportToneEnabled.toggle() },
+            label: {
+              Image(systemName: isExportToneEnabled ? "bell.fill" : "bell.slash.fill")
+                .font(.title3)
+                .frame(width: 28, height: 28)
+            }
+          )
           .buttonStyle(.plain)
           .help(isExportToneEnabled ? "Turn export tone off" : "Turn export tone on")
           .accessibilityLabel(isExportToneEnabled ? "Export tone on" : "Export tone off")
