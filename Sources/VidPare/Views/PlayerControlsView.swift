@@ -5,9 +5,11 @@ struct PlayerControlsView: View {
     let currentTime: CMTime
     let duration: CMTime
     let isPlaying: Bool
+    let isSoundEnabled: Bool
     @Bindable var trimState: TrimState
 
     var onPlayPause: () -> Void
+    var onToggleSound: () -> Void
     var onSetInPoint: () -> Void
     var onSetOutPoint: () -> Void
 
@@ -22,6 +24,16 @@ struct PlayerControlsView: View {
             .buttonStyle(.plain)
             .keyboardShortcut(.space, modifiers: [])
             .accessibilityIdentifier(AccessibilityID.playPauseButton)
+
+            Button(action: onToggleSound) {
+                Image(systemName: isSoundEnabled ? "music.note" : "music.note.slash")
+                    .font(.title3)
+                    .frame(width: 32, height: 32)
+            }
+            .buttonStyle(.plain)
+            .help(isSoundEnabled ? "Turn sound off" : "Turn sound on")
+            .accessibilityLabel(isSoundEnabled ? "Sound on" : "Sound off")
+            .accessibilityIdentifier(AccessibilityID.soundToggleButton)
 
             // Time display
             Text(TimeFormatter.preciseString(from: currentTime))

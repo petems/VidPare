@@ -105,6 +105,34 @@ final class AcceptanceTests: XCTestCase {
     try openExportSheet(inWindow: window)
     try assertSavePanelFilenameEditable(app: app, window: window)
   }
+
+  func testExportSheet_toneToggleIsInteractive() throws {
+    let tempFile = try copyFixtureToTemp()
+    defer { try? FileManager.default.removeItem(at: tempFile) }
+
+    let app = axApp(for: pid)
+    guard let window = axWindows(of: app).first else {
+      XCTFail("No app window found")
+      return
+    }
+
+    try openVideoFile(at: tempFile, inWindow: window)
+    try openExportSheet(inWindow: window, submitExport: false)
+
+    var toneToggleButton: AXUIElement?
+    let toneToggleFound = waitFor(timeout: 5.0) {
+      toneToggleButton = findElement(withIdentifier: "vidpare.export.toneToggle", in: window)
+      return toneToggleButton != nil
+    }
+    XCTAssertTrue(toneToggleFound, "Export sheet should show a tone toggle button")
+    guard let toneToggleButton else {
+      return
+    }
+
+    XCTAssertTrue(pressButton(toneToggleButton), "Tone toggle should be pressable")
+    XCTAssertTrue(pressButton(toneToggleButton), "Tone toggle should be pressable repeatedly")
+    dismissExportSheet(window: window)
+  }
 }
 
 // MARK: - Test Helpers
@@ -185,7 +213,10 @@ extension AcceptanceTests {
     }
   }
 
-  private func openExportSheet(inWindow window: AXUIElement) throws {
+  private func openExportSheet(
+    inWindow window: AXUIElement,
+    submitExport: Bool = true
+  ) throws {
     let exportToolbarFound = waitFor(timeout: 5.0) {
       findElement(withIdentifier: "vidpare.toolbar.export", in: window) != nil
     }
@@ -204,6 +235,10 @@ extension AcceptanceTests {
     }
     XCTAssertTrue(exportSheetAppeared, "Export sheet should appear with Export button")
 
+    if !submitExport {
+      return
+    }
+
     guard let exportButton = findElement(
       withIdentifier: "vidpare.export.exportButton",
       in: window
@@ -215,6 +250,16 @@ extension AcceptanceTests {
     // Wait for capability loading to finish
     Thread.sleep(forTimeInterval: 1.0)
     XCTAssertTrue(pressButton(exportButton), "Should press Export button")
+  }
+
+  private func dismissExportSheet(window: AXUIElement) {
+    if let cancelButton = findElement(withIdentifier: "vidpare.export.cancelButton", in: window) {
+      _ = pressButton(cancelButton)
+      return
+    }
+    if let cancelButton = findButton(titled: "Cancel", in: window) {
+      _ = pressButton(cancelButton)
+    }
   }
 
   private func assertSavePanelFilenameEditable(

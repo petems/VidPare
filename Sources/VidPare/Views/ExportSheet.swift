@@ -14,6 +14,7 @@ struct ExportSheet: View {
   @State private var capabilities: ExportCapabilities?
   @State private var isLoadingCapabilities = true
   @State private var capabilityMessage: String?
+  @State private var isExportToneEnabled = false
 
   private var resolvedSelection: ResolvedExportSelection? {
     capabilities?.resolvedSelection(
@@ -197,6 +198,18 @@ struct ExportSheet: View {
         }
       } else {
         HStack {
+          Button(action: { isExportToneEnabled.toggle() }) {
+            Image(systemName: isExportToneEnabled ? "bell.fill" : "bell.slash.fill")
+              .font(.title3)
+              .frame(width: 28, height: 28)
+          }
+          .buttonStyle(.plain)
+          .help(isExportToneEnabled ? "Turn export tone off" : "Turn export tone on")
+          .accessibilityLabel(isExportToneEnabled ? "Export tone on" : "Export tone off")
+          .accessibilityIdentifier(AccessibilityID.exportToneToggleButton)
+
+          Spacer()
+
           Button("Cancel") {
             onDismiss()
           }
@@ -331,7 +344,9 @@ struct ExportSheet: View {
           sourceFileType: document.sourceFileType
         )
         exportResult = result
-        NSSound(named: "Glass")?.play()
+        if isExportToneEnabled {
+          NSSound(named: "Glass")?.play()
+        }
       } catch is CancellationError {
         // User cancelled, do nothing
       } catch ExportError.cancelled {

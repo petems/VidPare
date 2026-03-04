@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var player = AVPlayer()
     @State private var currentTime: CMTime = .zero
     @State private var isPlaying = false
+    @State private var isSoundEnabled = false
     @State private var thumbnails: [NSImage] = []
     @State private var showExportSheet = false
     @State private var showFileImporter = false
@@ -89,6 +90,7 @@ struct ContentView: View {
         }
         .navigationTitle(windowTitle)
         .onAppear {
+            applySoundPreference()
             if let url = initialFileURL {
                 loadVideo(url: url)
             }
@@ -143,8 +145,10 @@ struct ContentView: View {
                 currentTime: currentTime,
                 duration: document.duration,
                 isPlaying: isPlaying,
+                isSoundEnabled: isSoundEnabled,
                 trimState: trimState,
                 onPlayPause: togglePlayback,
+                onToggleSound: toggleSound,
                 onSetInPoint: setInPoint,
                 onSetOutPoint: setOutPoint
             )
@@ -232,6 +236,7 @@ struct ContentView: View {
                 // Set up player
                 let playerItem = AVPlayerItem(asset: doc.asset)
                 player.replaceCurrentItem(with: playerItem)
+                applySoundPreference()
                 setupTimeObserver()
 
                 // Generate thumbnails
@@ -306,6 +311,15 @@ struct ContentView: View {
             player.play()
         }
         isPlaying = player.rate > 0
+    }
+
+    private func toggleSound() {
+        isSoundEnabled.toggle()
+        applySoundPreference()
+    }
+
+    private func applySoundPreference() {
+        player.isMuted = !isSoundEnabled
     }
 
     private func seek(to time: CMTime) {
