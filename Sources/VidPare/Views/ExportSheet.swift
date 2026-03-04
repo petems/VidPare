@@ -281,7 +281,9 @@ struct ExportSheet: View {
     }
     .padding(24)
   }
+}
 
+extension ExportSheet {
   private func loadCapabilities() async {
     isLoadingCapabilities = true
     do {

@@ -1,7 +1,5 @@
 import AVFoundation
-import ImageIO
 import Observation
-import UniformTypeIdentifiers
 
 @MainActor
 @Observable
@@ -261,67 +259,6 @@ final class VideoEngine: @unchecked Sendable {
         return (resolved.format, resolved.quality)
     }
 
-    private func exportGIF(
-        asset: AVURLAsset,
-        trimRange: CMTimeRange,
-        outputURL: URL,
-        gifSettings: GIFExportSettings
-    ) async throws -> ExportResult {
-        let trimSeconds = CMTimeGetSeconds(trimRange.duration)
-        guard trimSeconds > 0, trimSeconds.isFinite else {
-            throw ExportError.incompatibleSelection("Select a non-zero trim range to export GIF.")
-        }
-
-        if trimSeconds > GIFExportSettings.maxDurationSeconds {
-            throw ExportError.gifDurationLimitExceeded(maxSeconds: GIFExportSettings.maxDurationSeconds)
-        }
-
-        let tempOutputURL = temporaryOutputURL(for: outputURL)
-        let destinationExistedBeforeExport = FileManager.default.fileExists(atPath: outputURL.path)
-        let startDate = Date()
-
-        isExporting = true
-        progress = 0
-
-        let task = Task.detached(priority: .userInitiated) { [asset, trimRange, tempOutputURL, gifSettings] in
-            try await Self.renderGIF(
-                asset: asset,
-                trimRange: trimRange,
-                outputURL: tempOutputURL,
-                settings: gifSettings
-            ) { [engine = self] updatedProgress in
-                await MainActor.run {
-                    if updatedProgress >= engine.progress {
-                        engine.progress = updatedProgress
-                    }
-                }
-            }
-        }
-
-        gifExportTask = task
-
-        do {
-            try await task.value
-            gifExportTask = nil
-            return try finalizeExportedTemporaryResult(
-                tempOutputURL: tempOutputURL,
-                outputURL: outputURL,
-                destinationExistedBeforeExport: destinationExistedBeforeExport,
-                startDate: startDate
-            )
-        } catch is CancellationError {
-            gifExportTask = nil
-            resetExportState()
-            try? FileManager.default.removeItem(at: tempOutputURL)
-            throw ExportError.cancelled
-        } catch {
-            gifExportTask = nil
-            resetExportState()
-            try? FileManager.default.removeItem(at: tempOutputURL)
-            throw error
-        }
-    }
-
     private func createExportSession(
         asset: AVURLAsset,
         requestedQuality: QualityPreset,
@@ -434,125 +371,67 @@ final class VideoEngine: @unchecked Sendable {
         try FileManager.default.moveItem(at: temporaryURL, to: outputURL)
         return outputURL
     }
+}
 
-    nonisolated private static func renderGIF(
+private extension VideoEngine {
+    func exportGIF(
         asset: AVURLAsset,
         trimRange: CMTimeRange,
         outputURL: URL,
-        settings: GIFExportSettings,
-        progressHandler: @escaping @Sendable (Double) async -> Void
-    ) async throws {
-        let tracks = try await asset.loadTracks(withMediaType: .video)
-        guard let videoTrack = tracks.first else {
-            throw ExportError.exportFailed("The selected file does not contain a video track.")
+        gifSettings: GIFExportSettings
+    ) async throws -> ExportResult {
+        let trimSeconds = CMTimeGetSeconds(trimRange.duration)
+        guard trimSeconds > 0, trimSeconds.isFinite else {
+            throw ExportError.incompatibleSelection("Select a non-zero trim range to export GIF.")
         }
 
-        let naturalSize = try await videoTrack.load(.naturalSize)
-        let preferredTransform = try await videoTrack.load(.preferredTransform)
-        let orientedSize = orientedVideoSize(naturalSize: naturalSize, transform: preferredTransform)
-
-        let targetSize = CGSize(
-            width: max(1, floor(orientedSize.width * settings.scale.rawValue)),
-            height: max(1, floor(orientedSize.height * settings.scale.rawValue))
-        )
-
-        let frameCount = gifFrameCount(
-            duration: trimRange.duration,
-            frameRate: settings.frameRate.rawValue
-        )
-
-        guard let destination = CGImageDestinationCreateWithURL(
-            outputURL as CFURL,
-            UTType.gif.identifier as CFString,
-            frameCount,
-            nil
-        ) else {
-            throw ExportError.exportFailed("Failed to create GIF destination.")
+        if trimSeconds > GIFExportSettings.maxDurationSeconds {
+            throw ExportError.gifDurationLimitExceeded(maxSeconds: GIFExportSettings.maxDurationSeconds)
         }
 
-        let globalProperties: [CFString: Any] = [
-            kCGImagePropertyGIFDictionary: [
-                kCGImagePropertyGIFLoopCount: 0
-            ]
-        ]
-        CGImageDestinationSetProperties(destination, globalProperties as CFDictionary)
+        let tempOutputURL = temporaryOutputURL(for: outputURL)
+        let destinationExistedBeforeExport = FileManager.default.fileExists(atPath: outputURL.path)
+        let startDate = Date()
 
-        let generator = AVAssetImageGenerator(asset: asset)
-        generator.appliesPreferredTrackTransform = true
-        generator.requestedTimeToleranceBefore = .zero
-        generator.requestedTimeToleranceAfter = .zero
-        generator.maximumSize = targetSize
+        isExporting = true
+        progress = 0
 
-        let delayTime = 1.0 / Double(settings.frameRate.rawValue)
-
-        for frameIndex in 0..<frameCount {
-            try Task.checkCancellation()
-
-            let offsetSeconds = Double(frameIndex) / Double(settings.frameRate.rawValue)
-            let frameTime = CMTimeAdd(
-                trimRange.start,
-                CMTime(seconds: offsetSeconds, preferredTimescale: 600)
-            )
-
-            let image = try generator.copyCGImage(at: frameTime, actualTime: nil)
-
-            let frameProperties: [CFString: Any] = [
-                kCGImagePropertyGIFDictionary: [
-                    kCGImagePropertyGIFDelayTime: delayTime
-                ]
-            ]
-
-            autoreleasepool {
-                CGImageDestinationAddImage(destination, image, frameProperties as CFDictionary)
+        let task = Task.detached(priority: .userInitiated) { [asset, trimRange, tempOutputURL, gifSettings] in
+            try await Self.renderGIF(
+                asset: asset,
+                trimRange: trimRange,
+                outputURL: tempOutputURL,
+                settings: gifSettings
+            ) { [engine = self] updatedProgress in
+                await MainActor.run {
+                    if updatedProgress >= engine.progress {
+                        engine.progress = updatedProgress
+                    }
+                }
             }
-
-            await progressHandler(Double(frameIndex + 1) / Double(frameCount))
         }
 
-        try Task.checkCancellation()
+        gifExportTask = task
 
-        guard CGImageDestinationFinalize(destination) else {
-            throw ExportError.exportFailed("Failed to finalize GIF file.")
-        }
-    }
-
-    nonisolated private static func gifFrameCount(duration: CMTime, frameRate: Int) -> Int {
-        let seconds = CMTimeGetSeconds(duration)
-        guard seconds.isFinite, seconds > 0 else { return 1 }
-        return max(1, Int(floor(seconds * Double(frameRate))))
-    }
-
-    nonisolated private static func orientedVideoSize(
-        naturalSize: CGSize,
-        transform: CGAffineTransform
-    ) -> CGSize {
-        let transformedRect = CGRect(origin: .zero, size: naturalSize).applying(transform)
-        return CGSize(
-            width: abs(transformedRect.width),
-            height: abs(transformedRect.height)
-        )
-    }
-}
-
-enum ExportError: LocalizedError {
-    case sessionCreationFailed
-    case incompatibleSelection(String)
-    case exportFailed(String)
-    case gifDurationLimitExceeded(maxSeconds: TimeInterval)
-    case cancelled
-
-    var errorDescription: String? {
-        switch self {
-        case .sessionCreationFailed:
-            return "Failed to create export session. The file format may not support the selected export settings."
-        case .incompatibleSelection(let reason):
-            return "The selected export options are incompatible: \(reason)"
-        case .exportFailed(let reason):
-            return "Export failed: \(reason)"
-        case .gifDurationLimitExceeded(let maxSeconds):
-            return "GIF export is limited to \(Int(maxSeconds)) seconds. Reduce the trim range and try again."
-        case .cancelled:
-            return "Export was cancelled."
+        do {
+            try await task.value
+            gifExportTask = nil
+            return try finalizeExportedTemporaryResult(
+                tempOutputURL: tempOutputURL,
+                outputURL: outputURL,
+                destinationExistedBeforeExport: destinationExistedBeforeExport,
+                startDate: startDate
+            )
+        } catch is CancellationError {
+            gifExportTask = nil
+            resetExportState()
+            try? FileManager.default.removeItem(at: tempOutputURL)
+            throw ExportError.cancelled
+        } catch {
+            gifExportTask = nil
+            resetExportState()
+            try? FileManager.default.removeItem(at: tempOutputURL)
+            throw error
         }
     }
 }
