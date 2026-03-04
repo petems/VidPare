@@ -78,6 +78,10 @@ a {
   letter-spacing: -0.05em;
 }
 
+.hero-brand a {
+  text-decoration: none;
+}
+
 .surface {
   background: color-mix(in srgb, var(--surface) 88%, #eff5ff 12%);
   border: 1px solid #dce7ff;
@@ -94,13 +98,16 @@ a {
   margin-inline: auto;
 }
 
-.hero h1 {
+.hero-title-stack {
+  display: grid;
+  gap: 0.08em;
+  margin: 0;
+}
+
+.hero-title-stack h2 {
   font-size: clamp(2rem, 4.8vw, 4.5rem);
   line-height: 0.96;
-  margin: 0 auto;
-  max-width: 14ch;
-  text-wrap: balance;
-  white-space: pre-line;
+  margin: 0;
 }
 
 .eyebrow {
@@ -192,7 +199,7 @@ summary:focus-visible {
   justify-content: center;
 }
 
-main > section:not(.hero) {
+.centered-section {
   margin-inline: auto;
   text-align: center;
 }
@@ -257,9 +264,7 @@ main > section:not(.hero) {
 .cta-banner,
 .faq {
   margin-top: 1.8rem;
-  text-align: center;
   width: min(900px, 100%);
-  margin-inline: auto;
 }
 
 .tech-block {
@@ -402,24 +407,6 @@ html:not(.is-ready) .reveal {
 
   .site-header nav {
     flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .hero {
-    text-align: center;
-  }
-
-  .hero h1 {
-    margin-inline: auto;
-  }
-
-  .lede,
-  .microcopy {
-    margin-inline: auto;
-  }
-
-  .cta-row,
-  .trust-strip {
     justify-content: center;
   }
 }
