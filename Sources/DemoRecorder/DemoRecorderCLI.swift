@@ -34,6 +34,7 @@ struct DemoRecorderCLI {
         --output <path>   Path for the output MP4 (default: site/public/demo.mp4)
         --poster <path>   Path for the poster frame JPEG (optional)
         --width <int>     Output video width in pixels (default: 1920)
+        --bitrate <int>   Output video bitrate in bps (default: 5000000)
         --fps <int>       Recording frame rate (default: 30)
       """)
   }
@@ -45,6 +46,7 @@ struct DemoRecorderCLI {
     print("DemoRecorder: Starting demo recording...")
     print("  Source video: \(config.resolvedSource)")
     print("  Output: \(config.resolvedOutput)")
+    print("  Target bitrate: \(config.targetBitrate) bps")
     if let poster = config.resolvedPoster {
       print("  Poster: \(poster)")
     }
@@ -97,6 +99,7 @@ struct RecordConfig {
   let resolvedOutput: String
   let resolvedPoster: String?
   let outputWidth: Int
+  let targetBitrate: Int
   let fps: Int
 }
 
@@ -105,6 +108,7 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
   var outputPath = "site/public/demo.mp4"
   var posterPath: String?
   var outputWidth = 1920
+  var targetBitrate = 5_000_000
   var fps = 30
 
   var i = 0
@@ -127,6 +131,8 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
       posterPath = value
     case "--width":
       outputWidth = Int(value) ?? 1920
+    case "--bitrate":
+      targetBitrate = Int(value) ?? 5_000_000
     case "--fps":
       fps = Int(value) ?? 30
     default:
@@ -142,6 +148,11 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
     DemoRecorderCLI.printUsage()
     exit(1)
   }
+  guard targetBitrate > 0 else {
+    print("Error: --bitrate must be greater than 0.")
+    DemoRecorderCLI.printUsage()
+    exit(1)
+  }
 
   let cwd = FileManager.default.currentDirectoryPath
   return RecordConfig(
@@ -149,6 +160,7 @@ private func parseRecordArgs(_ args: [String]) throws -> RecordConfig {
     resolvedOutput: resolvePath(outputPath, cwd: cwd),
     resolvedPoster: posterPath.map { resolvePath($0, cwd: cwd) },
     outputWidth: outputWidth,
+    targetBitrate: targetBitrate,
     fps: fps
   )
 }
@@ -246,7 +258,8 @@ private func postProcess(rawURL: URL, config: RecordConfig) async throws {
     inputURL: rawURL,
     outputURL: finalOutputURL,
     posterURL: posterURL,
-    targetWidth: config.outputWidth
+    targetWidth: config.outputWidth,
+    targetBitrate: config.targetBitrate
   )
   try await processor.process()
 }

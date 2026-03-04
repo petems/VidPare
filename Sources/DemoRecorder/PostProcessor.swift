@@ -1,6 +1,7 @@
 import AppKit
-import AVFoundation
+@preconcurrency import AVFoundation
 import CoreMedia
+import CoreVideo
 import Foundation
 
 struct PostProcessor {
@@ -116,47 +117,91 @@ struct PostProcessor {
     let renderSize = videoComposition.renderSize
     print(
       "  Post-process render size: \(Int(renderSize.width))x\(Int(renderSize.height))")
+    print("  Post-process target bitrate: \(targetBitrate) bps")
 
-    // Try HighestQuality with video composition first
-    if let result = try? await exportWith(
-      asset: composition,
-      videoComposition: videoComposition,
-      preset: AVAssetExportPresetHighestQuality
-    ) {
-      if result { return }
+    do {
+      try await exportWithBitrate(asset: composition, videoComposition: videoComposition)
+    } catch {
+      if FileManager.default.fileExists(atPath: outputURL.path) {
+        try? FileManager.default.removeItem(at: outputURL)
+      }
+      throw error
     }
-
-    // Fall back to 1920x1080 preset (still applies video composition scaling)
-    print("  HighestQuality preset failed, trying 1920x1080 preset...")
-    if let result = try? await exportWith(
-      asset: composition,
-      videoComposition: videoComposition,
-      preset: AVAssetExportPreset1920x1080
-    ) {
-      if result { return }
-    }
-
-    throw PostProcessorError.exportFailed
   }
 
-  private func exportWith(
-    asset: AVAsset, videoComposition: AVMutableVideoComposition, preset: String
-  ) async throws -> Bool {
-    guard
-      let exportSession = AVAssetExportSession(asset: asset, presetName: preset)
-    else {
-      return false
+  private func exportWithBitrate(
+    asset: AVAsset,
+    videoComposition: AVMutableVideoComposition
+  ) async throws {
+    guard let videoTrack = try await asset.loadTracks(withMediaType: .video).first else {
+      throw PostProcessorError.noVideoTrack
     }
-    exportSession.outputURL = outputURL
-    exportSession.outputFileType = .mp4
-    exportSession.videoComposition = videoComposition
 
-    await exportSession.export()
-    if exportSession.status == .completed { return true }
-    if FileManager.default.fileExists(atPath: outputURL.path) {
-      try? FileManager.default.removeItem(at: outputURL)
+    let reader = try AVAssetReader(asset: asset)
+    let readerOutput = AVAssetReaderVideoCompositionOutput(
+      videoTracks: [videoTrack],
+      videoSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange]
+    )
+    readerOutput.videoComposition = videoComposition
+    guard reader.canAdd(readerOutput) else {
+      throw PostProcessorError.exportFailed
     }
-    return false
+    reader.add(readerOutput)
+
+    let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mp4)
+    let renderSize = videoComposition.renderSize
+    let width = Int(renderSize.width)
+    let height = Int(renderSize.height)
+    let videoSettings: [String: Any] = [
+      AVVideoCodecKey: AVVideoCodecType.h264,
+      AVVideoWidthKey: width,
+      AVVideoHeightKey: height,
+      AVVideoCompressionPropertiesKey: [
+        AVVideoAverageBitRateKey: targetBitrate,
+        AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+      ],
+    ]
+    let writerInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+    writerInput.expectsMediaDataInRealTime = false
+    guard writer.canAdd(writerInput) else {
+      throw PostProcessorError.exportFailed
+    }
+    writer.add(writerInput)
+
+    guard reader.startReading() else {
+      throw reader.error ?? PostProcessorError.exportFailed
+    }
+    guard writer.startWriting() else {
+      throw writer.error ?? PostProcessorError.exportFailed
+    }
+    writer.startSession(atSourceTime: .zero)
+
+    while reader.status == .reading {
+      if writerInput.isReadyForMoreMediaData {
+        if let sampleBuffer = readerOutput.copyNextSampleBuffer() {
+          if !writerInput.append(sampleBuffer) {
+            throw writer.error ?? PostProcessorError.exportFailed
+          }
+        } else {
+          break
+        }
+      } else {
+        try await Task.sleep(nanoseconds: 1_000_000)  // 1ms backoff while the writer catches up.
+      }
+    }
+
+    if reader.status == .failed {
+      throw reader.error ?? PostProcessorError.exportFailed
+    }
+    if reader.status == .cancelled {
+      throw PostProcessorError.exportFailed
+    }
+
+    writerInput.markAsFinished()
+    await writer.finishWriting()
+    if writer.status != .completed {
+      throw writer.error ?? PostProcessorError.exportFailed
+    }
   }
 
   private func extractPoster(from videoURL: URL, to posterURL: URL) async throws {

@@ -117,6 +117,7 @@ sign: ## Sign and notarize (requires Apple credentials)
 DEMO_SRC_VIDEO   := scripts/demo/demo-source.mp4
 DEMO_OUTPUT      := site/public/demo.mp4
 DEMO_POSTER      := site/public/demo-poster.jpg
+DEMO_BITRATE     ?= 5000000
 
 .PHONY: demo-record
 demo-record: build ## Record a fresh demo MP4 (requires Screen Recording + Accessibility permissions)
@@ -131,7 +132,8 @@ demo-record: build ## Record a fresh demo MP4 (requires Screen Recording + Acces
 	VIDPARE_BINARY="$(DEBUG_BIN)" swift run DemoRecorder record \
 		--source "$(DEMO_SRC_VIDEO)" \
 		--output "$(DEMO_OUTPUT)" \
-		--poster "$(DEMO_POSTER)"
+		--poster "$(DEMO_POSTER)" \
+		--bitrate "$(DEMO_BITRATE)"
 
 .PHONY: demo
 demo: demo-record ## Record demo and verify output exists
