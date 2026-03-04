@@ -48,10 +48,35 @@ struct DemoScenario {
     guard let playButton = findElement(withIdentifier: "vidpare.playPause", in: window) else {
       throw ScenarioError.elementNotFound("vidpare.playPause")
     }
+    guard let timeline = findElement(withIdentifier: "vidpare.timeline", in: window) else {
+      throw ScenarioError.elementNotFound("vidpare.timeline")
+    }
+
+    // Seek to the ~4s mark (matching where trim handles will be placed)
+    try seekTimeline(timeline, toFraction: 4.0 / 14.0)
+    sleep(for: 0.5)
+
+    // Play through part of the trim region (~4s to ~6s = 2s of playback)
     moveAndClick(playButton)
-    sleep(for: 3.0)
+    sleep(for: 2.0)
     moveAndClick(playButton)
     sleep(for: 0.5)
+  }
+
+  /// Click on the timeline at a given fraction to seek the playhead there.
+  private func seekTimeline(_ timeline: AXUIElement, toFraction fraction: CGFloat) throws {
+    guard let timelinePos = axPosition(of: timeline),
+      let timelineSize = axSize(of: timeline)
+    else {
+      throw ScenarioError.cannotGetElementFrame("timeline")
+    }
+    let target = CGPoint(
+      x: timelinePos.x + fraction * timelineSize.width,
+      y: timelinePos.y + timelineSize.height / 2.0
+    )
+    let current = CGEvent(source: nil)?.location ?? target
+    smoothMoveCursor(from: current, to: target, duration: 0.3)
+    postMouseClick(at: target)
   }
 
   // MARK: - Phase 4: Trim Points
