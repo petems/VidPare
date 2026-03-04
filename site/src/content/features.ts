@@ -1,10 +1,11 @@
 export type FeatureBadge = 'free' | 'open-source' | 'native' | 'privacy';
+export type FeatureIconName = 'native-performance' | 'near-instant-exports' | 'local-privacy';
 
 export interface FeatureItem {
   title: string;
   body: string;
   badge?: FeatureBadge;
-  icon?: string;
+  icon?: FeatureIconName;
 }
 
 export const featureItems: FeatureItem[] = [
@@ -12,19 +13,19 @@ export const featureItems: FeatureItem[] = [
     title: 'Truly native Mac performance',
     body: 'Built directly on Apple\'s media frameworks with hardware acceleration. Trimming is fast because VidPare is a real Mac app, not a web wrapper.',
     badge: 'native',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/></svg>'
+    icon: 'native-performance'
   },
   {
     title: 'Near-instant exports',
     body: 'Most trims export in seconds, not minutes. VidPare skips re-encoding when possible, so you get lossless output with no waiting around.',
     badge: 'free',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+    icon: 'near-instant-exports'
   },
   {
     title: 'Your files never leave your Mac',
     body: 'No uploads, no cloud processing, no file-size limits. Everything happens locally on your machine — your videos stay private.',
     badge: 'privacy',
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>'
+    icon: 'local-privacy'
   }
 ];
 

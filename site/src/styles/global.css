@@ -264,6 +264,10 @@ summary:focus-visible {
 }
 
 .hero-demo {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 960px;
+  justify-self: center;
   margin-top: 1rem;
   border-radius: 12px;
   overflow: hidden;
@@ -434,12 +438,12 @@ summary:focus-visible {
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transition: max-height 300ms ease, opacity 300ms ease, margin 300ms ease;
+  transition: opacity 300ms ease, margin 300ms ease;
   margin: 0;
 }
 
 .faq details[open] p {
-  max-height: 10em;
+  max-height: none;
   opacity: 1;
   margin-top: 0.5rem;
 }

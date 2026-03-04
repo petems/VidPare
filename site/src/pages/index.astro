@@ -2,6 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import { siteConfig } from '../content/site.config';
 import { faqs, featureItems } from '../content/features';
+import FeatureIcon from '../components/FeatureIcon.astro';
 ---
 
 <MainLayout>
@@ -49,6 +50,13 @@ import { faqs, featureItems } from '../content/features';
           </div>
         </div>
       </div>
+      <div class="hero-demo">
+        <video autoplay muted loop playsinline preload="metadata"
+               poster="/demo-poster.jpg" width="1280" height="800"
+               aria-hidden="true">
+          <source src="/demo.mp4" type="video/mp4" />
+        </video>
+      </div>
     </section>
 
     <section class="trust-strip" aria-label="Key guarantees">
@@ -63,7 +71,11 @@ import { faqs, featureItems } from '../content/features';
       {
         featureItems.map((feature) => (
           <article class="card">
-            {feature.icon && <div class="card-icon" set:html={feature.icon} />}
+            {feature.icon && (
+              <div class="card-icon" aria-hidden="true">
+                <FeatureIcon name={feature.icon} />
+              </div>
+            )}
             <p class="badge">{feature.badge}</p>
             <h2>{feature.title}</h2>
             <p>{feature.body}</p>

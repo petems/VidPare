@@ -15,7 +15,7 @@
   <text x="100" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="36" fill="#5b6b85">No uploads. No nonsense.</text>
   <rect x="100" y="400" width="240" height="50" rx="25" fill="url(#btn)"/>
   <text x="145" y="432" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="600" fill="white">Download for macOS</text>
-  <text x="100" y="530" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#8a9bba">Free &amp; open source &middot; Native macOS &middot; MIT License</text>
+  <text x="100" y="530" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#8a9bba">Free &amp; open source &#183; Native macOS &#183; MIT License</text>
   <!-- App window mockup -->
   <rect x="700" y="120" width="400" height="380" rx="12" fill="#1a1a2e" stroke="#3a3a5a" stroke-width="1"/>
   <rect x="700" y="120" width="400" height="36" rx="12" fill="#262640"/>
