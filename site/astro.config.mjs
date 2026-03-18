@@ -7,7 +7,8 @@ export default defineConfig({
   integrations: [tailwind(), sitemap()],
   vite: {
     build: {
-      target: 'es2022'
+      target: 'es2022',
+      assetsInlineLimit: 0
     }
   }
 });
