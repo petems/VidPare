@@ -36,11 +36,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonicalUrl.toString()} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://github.com" />
-  </head>
-  <body>
-    <slot />
     <script>
       import '../scripts/datadog-rum.ts';
     </script>
+  </head>
+  <body>
+    <slot />
   </body>
 </html>
