@@ -187,10 +187,65 @@ summary:focus-visible {
   justify-content: center;
 }
 
+.hero-demo__trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: #dce9ff;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.hero-demo__poster,
 .hero-demo video {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.hero-demo__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.8rem;
+  padding: 1.5rem;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.58) 100%);
+}
+
+.hero-demo__play {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: min(100%, 15rem);
+  margin-inline: auto;
+  padding: 0.85rem 1.25rem;
+  border-radius: 999px;
+  background: rgba(10, 108, 255, 0.95);
+  color: #ffffff;
+  font-family: 'Space Grotesk Variable', 'Avenir Next', sans-serif;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-weight: 700;
+  box-shadow: 0 20px 40px -24px rgba(10, 108, 255, 0.9);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.hero-demo__hint {
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 2px 16px rgba(15, 23, 42, 0.55);
+}
+
+.hero-demo__trigger:hover .hero-demo__play,
+.hero-demo__trigger:focus-visible .hero-demo__play {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 48px -24px rgba(10, 108, 255, 1);
 }
 
 .trust-strip {
