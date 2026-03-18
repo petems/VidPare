@@ -102,9 +102,11 @@ a {
   display: grid;
   gap: 0.08em;
   margin: 0;
+  padding: 0;
 }
 
-.hero-title-stack h2 {
+.hero-title-stack .line {
+  display: block;
   font-size: clamp(2rem, 4.8vw, 4.5rem);
   line-height: 0.96;
   margin: 0;

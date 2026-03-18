@@ -19,13 +19,13 @@ const heroTitleLines = siteConfig.heroTitle.split('\n').filter((line) => line.tr
     <section id="hero" class="hero surface reveal">
       <h1 class="hero-brand"><a href="#top">{siteConfig.appName}</a></h1>
       <p class="eyebrow">Native macOS video trimmer</p>
-      <div class="hero-title-stack">
+      <h2 class="hero-title-stack">
         {
           heroTitleLines.map((line) => (
-            <h2>{line}</h2>
+            <span class="line">{line}</span>
           ))
         }
-      </div>
+      </h2>
       <p class="lede">{siteConfig.heroSubtitle}</p>
       <div class="cta-row">
         <a class="btn primary" href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer">{siteConfig.cta.primaryLabel}</a>
