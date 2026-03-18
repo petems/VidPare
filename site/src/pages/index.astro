@@ -1,7 +1,9 @@
 ---
+import { Picture } from 'astro:assets';
 import MainLayout from '../layouts/MainLayout.astro';
 import { siteConfig } from '../content/site.config';
 import { faqs, featureItems } from '../content/features';
+import demoPoster from '../assets/demo-poster.jpg';
 
 const heroTitleLines = siteConfig.heroTitle.split('\n').filter((line) => line.trim().length > 0);
 ---
@@ -32,12 +34,35 @@ const heroTitleLines = siteConfig.heroTitle.split('\n').filter((line) => line.tr
         <a class="btn secondary" href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer">{siteConfig.cta.secondaryLabel}</a>
       </div>
       <p class="microcopy">Does one thing well: trim videos easily, quickly, and natively.</p>
-      <div class="hero-demo">
-        <video autoplay muted loop playsinline preload="metadata"
-               poster="/demo-poster.jpg" width="1280" height="800"
-               aria-hidden="true">
-          <source src="/demo.mp4" type="video/mp4" />
-        </video>
+      <div class="hero-demo" data-demo-player data-video-src="/demo.mp4" data-poster-src={demoPoster.src}>
+        <button class="hero-demo__trigger" type="button" data-demo-trigger>
+          <Picture
+            class="hero-demo__poster"
+            src={demoPoster}
+            alt=""
+            widths={[640, 920, 1280]}
+            sizes="(max-width: 960px) 100vw, 920px"
+            formats={['avif', 'webp']}
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+          <span class="hero-demo__overlay">
+            <span class="hero-demo__play">Play demo video</span>
+            <span class="hero-demo__hint">Loads the full MP4 only after you press play.</span>
+          </span>
+        </button>
+        <noscript>
+          <img
+            class="hero-demo__poster"
+            src={demoPoster.src}
+            alt="VidPare trimming a video clip in its native macOS interface."
+            width="1280"
+            height="800"
+            loading="eager"
+            decoding="async"
+          />
+        </noscript>
       </div>
     </section>
 

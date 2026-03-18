@@ -4,12 +4,7 @@ const markReady = (): void => {
   document.documentElement.classList.add('is-ready');
 };
 
-if (!prefersReducedMotion && 'startViewTransition' in document) {
-  // Use view transition API where supported for a cleaner first paint.
-  (document as Document & { startViewTransition: (callback: () => void) => void }).startViewTransition(markReady);
-} else {
-  markReady();
-}
+markReady();
 
 const revealNodes = document.querySelectorAll<HTMLElement>('.reveal');
 if (!prefersReducedMotion && 'IntersectionObserver' in window) {
@@ -32,4 +27,45 @@ if (!prefersReducedMotion && 'IntersectionObserver' in window) {
   revealNodes.forEach((node) => {
     node.classList.add('in-view');
   });
+}
+
+const demoPlayer = document.querySelector<HTMLElement>('[data-demo-player]');
+const demoTrigger = demoPlayer?.querySelector<HTMLButtonElement>('[data-demo-trigger]');
+const demoPosterSrc = demoPlayer?.dataset.posterSrc;
+const demoVideoSrc = demoPlayer?.dataset.videoSrc;
+
+if (demoPlayer && demoTrigger && demoVideoSrc) {
+  demoTrigger.addEventListener(
+    'click',
+    () => {
+      if (demoPlayer.dataset.active === 'true') {
+        return;
+      }
+
+      demoPlayer.dataset.active = 'true';
+
+      const video = document.createElement('video');
+      video.className = 'hero-demo__video';
+      video.controls = true;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      if (demoPosterSrc) {
+        video.poster = demoPosterSrc;
+      }
+      video.width = 1280;
+      video.height = 800;
+      video.setAttribute('aria-label', 'VidPare product demo video');
+      video.src = demoVideoSrc;
+
+      demoTrigger.replaceWith(video);
+
+      void video.play().catch(() => {
+        video.controls = true;
+      });
+    },
+    { once: true }
+  );
 }

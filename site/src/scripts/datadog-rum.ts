@@ -1,10 +1,15 @@
-import { datadogRum } from '@datadog/browser-rum';
 import { version } from '../../package.json';
 
 const applicationId = import.meta.env.PUBLIC_DATADOG_APPLICATION_ID;
 const clientToken = import.meta.env.PUBLIC_DATADOG_CLIENT_TOKEN;
 
-if (applicationId && clientToken) {
+const initDatadogRum = async (): Promise<void> => {
+  if (!(applicationId && clientToken)) {
+    return;
+  }
+
+  const { datadogRum } = await import('@datadog/browser-rum');
+
   datadogRum.init({
     applicationId,
     clientToken,
@@ -19,4 +24,6 @@ if (applicationId && clientToken) {
     trackLongTasks: true,
     defaultPrivacyLevel: 'mask-user-input',
   });
-}
+};
+
+void initDatadogRum();
