@@ -37,4 +37,3 @@ This repository is public. GitHub's guidance for public repos is explicit: untru
 - Add a dedicated workflow (for example `.github/workflows/ci-trusted-self-hosted.yml`) that:
   - triggers only on `push` to `master`/`main` and optionally `workflow_dispatch`
   - runs on a dedicated trusted runner label (for example `[self-hosted, macOS, vidpare-trusted]`)
-  - excludes any fork PR trigger
