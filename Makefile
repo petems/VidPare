@@ -62,7 +62,7 @@ test-snapshots: ## Run snapshot tests only
 
 .PHONY: test-record-snapshots
 test-record-snapshots: ## Re-record all snapshot baselines
-	SNAPSHOT_TESTING_RECORD=1 swift test --filter SnapshotTests $(V_FLAG)
+	SNAPSHOT_TESTING_RECORD=all swift test --filter SnapshotTests $(V_FLAG)
 
 .PHONY: test-acceptance
 test-acceptance: test-acceptance-smoke test-acceptance-e2e ## Run full acceptance suite (smoke + end-to-end flows)
@@ -164,6 +164,8 @@ screenshots: build ## Capture app snapshots and refresh docs screenshots
 	$(MAKE) test-snapshots
 	@cp "$(SNAPSHOT_DIR)/testPlayerControls_paused.1.png" "$(SCREENSHOT_DIR)/player-controls-paused.png"
 	@cp "$(SNAPSHOT_DIR)/testPlayerControls_playing.1.png" "$(SCREENSHOT_DIR)/player-controls-playing.png"
+	@cp "$(SNAPSHOT_DIR)/testPlayerControls_soundOff.1.png" "$(SCREENSHOT_DIR)/player-controls-sound-off.png"
+	@cp "$(SNAPSHOT_DIR)/testPlayerControls_soundOn.1.png" "$(SCREENSHOT_DIR)/player-controls-sound-on.png"
 	@cp "$(SNAPSHOT_DIR)/testTimelineView_noThumbnails.1.png" "$(SCREENSHOT_DIR)/timeline-no-thumbnails.png"
 	@cp "$(SNAPSHOT_DIR)/testTimelineView_trimAtStart.1.png" "$(SCREENSHOT_DIR)/timeline-trim-at-start.png"
 	@cp "$(SNAPSHOT_DIR)/testTimelineView_fullRange.1.png" "$(SCREENSHOT_DIR)/timeline-full-range.png"

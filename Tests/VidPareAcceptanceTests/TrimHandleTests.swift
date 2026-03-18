@@ -94,6 +94,31 @@ final class AcceptanceFlowTests: AcceptanceTestCase {
     XCTAssertTrue(dismissed, "Should dismiss save panel")
   }
 
+  func testExportSheet_toneToggleIsInteractive() throws {
+    let app = app()
+    let window = try mainWindow()
+    XCTAssertTrue(waitForEditor(in: window), "Editor should be ready before opening export")
+
+    try openExportSheet(from: window)
+
+    var toneToggle: AXUIElement?
+    let foundToneToggle = waitFor(timeout: 5.0) {
+      toneToggle = findElement(withIdentifier: "vidpare.export.toneToggle", in: window)
+      return toneToggle != nil
+    }
+    XCTAssertTrue(foundToneToggle, "Export sheet should show a tone toggle button")
+    guard let toneToggle else { return }
+
+    XCTAssertTrue(axMoveAndClick(toneToggle), "Tone toggle should be clickable")
+    XCTAssertTrue(axMoveAndClick(toneToggle), "Tone toggle should be clickable repeatedly")
+
+    if let cancel = findElement(withIdentifier: "vidpare.export.cancelButton", in: window) {
+      XCTAssertTrue(axMoveAndClick(cancel), "Should dismiss export sheet")
+    } else {
+      XCTAssertTrue(clickButton(titled: "Cancel", in: app), "Should dismiss export sheet")
+    }
+  }
+
   func testExportFlow_completesAndShowsCompletionView() throws {
     let app = app()
     let window = try mainWindow()
@@ -165,15 +190,7 @@ private extension AcceptanceFlowTests {
   }
 
   func openExportFlow(from window: AXUIElement) throws {
-    guard let exportToolbar = findElement(withIdentifier: "vidpare.toolbar.export", in: window) else {
-      throw XCTSkip("Export toolbar button not found")
-    }
-    XCTAssertTrue(axMoveAndClick(exportToolbar), "Should click Export toolbar button")
-
-    let exportSheetAppeared = waitFor(timeout: 5.0) {
-      findElement(withIdentifier: "vidpare.export.exportButton", in: window) != nil
-    }
-    XCTAssertTrue(exportSheetAppeared, "Export sheet should appear")
+    try openExportSheet(from: window)
 
     guard let exportButton = findElement(withIdentifier: "vidpare.export.exportButton", in: window) else {
       throw XCTSkip("Export button not found")
@@ -183,6 +200,18 @@ private extension AcceptanceFlowTests {
     XCTAssertTrue(buttonEnabled, "Export button should become enabled")
     Thread.sleep(forTimeInterval: 0.4)
     XCTAssertTrue(axMoveAndClick(exportButton), "Should click export button")
+  }
+
+  func openExportSheet(from window: AXUIElement) throws {
+    guard let exportToolbar = findElement(withIdentifier: "vidpare.toolbar.export", in: window) else {
+      throw XCTSkip("Export toolbar button not found")
+    }
+    XCTAssertTrue(axMoveAndClick(exportToolbar), "Should click Export toolbar button")
+
+    let exportSheetAppeared = waitFor(timeout: 5.0) {
+      findElement(withIdentifier: "vidpare.export.exportButton", in: window) != nil
+    }
+    XCTAssertTrue(exportSheetAppeared, "Export sheet should appear")
   }
 
   func waitForSavePanelFilenameField(

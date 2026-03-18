@@ -29,8 +29,10 @@ final class SnapshotTests: XCTestCase {
       currentTime: CMTime(seconds: 10, preferredTimescale: 600),
       duration: CMTime(seconds: 60, preferredTimescale: 600),
       isPlaying: false,
+      isSoundEnabled: false,
       trimState: trimState,
       onPlayPause: {},
+      onToggleSound: {},
       onSetInPoint: {},
       onSetOutPoint: {}
     )
@@ -46,8 +48,48 @@ final class SnapshotTests: XCTestCase {
       currentTime: CMTime(seconds: 10, preferredTimescale: 600),
       duration: CMTime(seconds: 60, preferredTimescale: 600),
       isPlaying: true,
+      isSoundEnabled: false,
       trimState: trimState,
       onPlayPause: {},
+      onToggleSound: {},
+      onSetInPoint: {},
+      onSetOutPoint: {}
+    )
+    try snapshotView(view, size: CGSize(width: 900, height: 80))
+  }
+
+  func testPlayerControls_soundOff() throws {
+    let trimState = TrimState()
+    trimState.startTime = .zero
+    trimState.endTime = CMTime(seconds: 30, preferredTimescale: 600)
+
+    let view = PlayerControlsView(
+      currentTime: CMTime(seconds: 10, preferredTimescale: 600),
+      duration: CMTime(seconds: 60, preferredTimescale: 600),
+      isPlaying: false,
+      isSoundEnabled: false,
+      trimState: trimState,
+      onPlayPause: {},
+      onToggleSound: {},
+      onSetInPoint: {},
+      onSetOutPoint: {}
+    )
+    try snapshotView(view, size: CGSize(width: 900, height: 80))
+  }
+
+  func testPlayerControls_soundOn() throws {
+    let trimState = TrimState()
+    trimState.startTime = .zero
+    trimState.endTime = CMTime(seconds: 30, preferredTimescale: 600)
+
+    let view = PlayerControlsView(
+      currentTime: CMTime(seconds: 10, preferredTimescale: 600),
+      duration: CMTime(seconds: 60, preferredTimescale: 600),
+      isPlaying: false,
+      isSoundEnabled: true,
+      trimState: trimState,
+      onPlayPause: {},
+      onToggleSound: {},
       onSetInPoint: {},
       onSetOutPoint: {}
     )
