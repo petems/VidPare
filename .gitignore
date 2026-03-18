@@ -45,6 +45,11 @@ dist/
 # Demo recording artifacts
 scripts/demo/*_trimmed*
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # Node / frontend
 node_modules/
 site/node_modules/
