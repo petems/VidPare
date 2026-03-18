@@ -97,8 +97,8 @@ const heroTitleLines = siteConfig.heroTitle.split('\n').filter((line) => line.tr
       <h2>Free, open source, and built for macOS creators</h2>
       <p>Use VidPare when you want trimming done in seconds, not a heavyweight editing suite.</p>
       <div class="cta-row">
-        <a class="btn primary" href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer">Download Latest Release</a>
-        <a class="btn secondary" href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer">Star on GitHub</a>
+        <a class="btn primary" href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer">{siteConfig.cta.primaryLabel ?? "Download Latest Release"}</a>
+        <a class="btn secondary" href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer">{siteConfig.cta.secondaryLabel ?? "Star on GitHub"}</a>
       </div>
     </section>
 
