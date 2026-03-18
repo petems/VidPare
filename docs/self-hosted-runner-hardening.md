@@ -14,7 +14,7 @@ This repository is public. GitHub's guidance for public repos is explicit: untru
 
 1. Set `Settings -> Actions -> General -> Workflow permissions` to `Read repository contents permission`.
 2. Set `Settings -> Actions -> General -> Fork pull request workflows from outside collaborators` to require approval for all external collaborators before workflow runs.
-3. Restrict Actions usage to trusted sources and require pinned SHAs where available (`Allow OWNER, and select non-OWNER, actions and reusable workflows` + SHA pinning policy).
+3. Restrict Actions usage to a trusted set (e.g., using `Allow specified actions and reusable workflows`), and enable the policy to require SHA pinning for all actions.
 4. Put self-hosted runners in a dedicated runner group limited to this repository only.
 5. Configure the runner group to allow only trusted workflows (for example `release.yml`, and optionally a dedicated trusted push workflow).
 
