@@ -39,8 +39,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <slot />
-    <script>
-      import '../scripts/datadog-rum.ts';
-    </script>
+    {import.meta.env.PROD && (
+      <script>
+        import '../scripts/datadog-rum.ts';
+      </script>
+    )}
   </body>
 </html>
