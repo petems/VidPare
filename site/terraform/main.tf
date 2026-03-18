@@ -47,11 +47,21 @@ resource "cloudflare_pages_project" "vidpare" {
       compatibility_date = "2026-01-01"
       fail_open          = true
       usage_model        = "standard"
+
+      environment_variables = {
+        PUBLIC_DATADOG_APPLICATION_ID = var.datadog_application_id
+        PUBLIC_DATADOG_CLIENT_TOKEN   = var.datadog_client_token
+      }
     }
     preview {
       compatibility_date = "2026-01-01"
       fail_open          = true
       usage_model        = "standard"
+
+      environment_variables = {
+        PUBLIC_DATADOG_APPLICATION_ID = var.datadog_application_id
+        PUBLIC_DATADOG_CLIENT_TOKEN   = var.datadog_client_token
+      }
     }
   }
 }
