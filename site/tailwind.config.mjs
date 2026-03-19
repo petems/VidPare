@@ -2,7 +2,49 @@
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,ts,tsx,md,mdx}'],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        'outline-variant': '#c2c6d6',
+        'on-primary': '#ffffff',
+        'surface-container': '#eaedff',
+        'tertiary-container': '#b75b00',
+        'on-primary-container': '#fefcff',
+        'on-tertiary-container': '#fffbff',
+        'surface-bright': '#faf8ff',
+        'on-surface': '#131b2e',
+        'secondary': '#495e8a',
+        'surface-tint': '#005ac2',
+        'on-surface-variant': '#424754',
+        'on-background': '#131b2e',
+        'outline': '#727785',
+        'surface': '#faf8ff',
+        'secondary-fixed-dim': '#b1c6f9',
+        'primary-fixed': '#d8e2ff',
+        'on-secondary-container': '#405682',
+        'inverse-surface': '#283044',
+        'tertiary': '#924700',
+        'surface-dim': '#d2d9f4',
+        'surface-container-lowest': '#ffffff',
+        'background': '#faf8ff',
+        'surface-variant': '#dae2fd',
+        'primary-container': '#2170e4',
+        'inverse-primary': '#adc6ff',
+        'primary': '#0058be',
+        'surface-container-highest': '#dae2fd',
+        'surface-container-high': '#e2e7ff',
+        'surface-container-low': '#f2f3ff',
+        'primary-fixed-dim': '#adc6ff',
+      },
+      fontFamily: {
+        headline: ['Manrope Variable', 'Manrope', 'system-ui', 'sans-serif'],
+        body: ['Inter Variable', 'Inter', 'system-ui', 'sans-serif'],
+      },
+      borderRadius: {
+        xl: '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };

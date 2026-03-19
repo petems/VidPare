@@ -57,6 +57,14 @@ brew install swift-format swiftlint pre-commit
 
 - `cd site && npm ci && npm run dev` — local dev server
 - `cd site && npm ci && npm run build` — production build (Cloudflare Pages)
+- **Design system**: The website follows the "High-End Editorial" design system documented in `site/stitch/DESIGN.md`. All UI changes to the website must align with this design document, including:
+  - **Typography**: Manrope (headlines) + Inter (body/UI) dual-typeface system
+  - **Colors**: Tonal surface hierarchy (`surface`, `surface-container-low`, `surface-container-lowest`, `surface-container-high`) with blue accent palette
+  - **No-Line Rule**: No 1px solid borders for sectioning — use background color shifts instead
+  - **Glass & Gradient**: Glassmorphism for floating elements; gradient CTAs (primary to primary-container at 135deg)
+  - **Elevation**: Depth through surface tier stacking, not shadows. Ambient shadows only for truly floating elements
+  - **Whitespace**: Generous spacing between sections; when in doubt, add more
+  - Reference `site/stitch/code.html` for the canonical HTML structure and `site/stitch/screen.png` for the visual target
 
 ## Architecture
 
