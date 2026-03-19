@@ -45,9 +45,24 @@ dist/
 # Demo recording artifacts
 scripts/demo/*_trimmed*
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # Node / frontend
 node_modules/
 site/node_modules/
 site/.astro/
 site/dist/
 site/.lighthouseci/
+
+# Playwright artifacts
+.playwright-cli/
+output/playwright/
+playwright-report/
+test-results/
+blob-report/
+site/playwright-report/
+site/test-results/
+site/blob-report/
