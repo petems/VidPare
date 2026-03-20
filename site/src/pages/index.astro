@@ -94,23 +94,25 @@ const featureLabels: Record<string, string> = {
     <!-- Feature Cards -->
     <section id="features" class="py-24 px-6 max-w-screen-2xl mx-auto reveal">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {featureItems.map((feature) => (
+        {featureItems.map((feature) => {
+          const badge = feature.badge ?? 'native';
+          return (
           <div class="bg-surface-container-lowest p-8 rounded-2xl transition-all hover:-translate-y-1">
             <div class="inline-block px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-bold tracking-widest mb-4">
-              {featureLabels[feature.badge ?? 'native']}
+              {featureLabels[badge]}
             </div>
             <div class="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                {feature.badge === 'native' && <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />}
-                {feature.badge === 'free' && <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />}
-                {feature.badge === 'privacy' && <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />}
-                {feature.badge === 'open-source' && <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />}
+                {badge === 'native' && <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />}
+                {badge === 'free' && <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />}
+                {badge === 'privacy' && <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />}
+                {badge === 'open-source' && <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />}
               </svg>
             </div>
             <h3 class="font-headline text-xl font-bold mb-3">{feature.title}</h3>
             <p class="text-on-surface-variant text-sm leading-relaxed">{feature.body}</p>
           </div>
-        ))}
+        )})}
       </div>
     </section>
 
@@ -203,7 +205,7 @@ const featureLabels: Record<string, string> = {
     <div class="flex flex-col md:flex-row justify-between items-center px-8 py-12 w-full mt-auto max-w-screen-2xl mx-auto">
       <div class="mb-8 md:mb-0">
         <span class="font-headline font-bold text-on-surface text-lg block mb-2">{siteConfig.appName}</span>
-        <p class="text-xs text-on-surface-variant max-w-xs">&copy; 2024 VidPare. All rights reserved.</p>
+        <p class="text-xs text-on-surface-variant max-w-xs">&copy; {new Date().getFullYear()} {siteConfig.appName}. All rights reserved.</p>
       </div>
       <div class="flex gap-8">
         <a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer">GitHub</a>
