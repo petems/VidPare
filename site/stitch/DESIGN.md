@@ -1,9 +1,9 @@
 # Design System Strategy: High-End Editorial
 
 ## 1. Overview & Creative North Star
-This design system is built to transform a functional developer utility into a premium digital experience. Our **Creative North Star** is **"The Precision Curator."** 
+This design system is built to transform a functional developer utility into a premium digital experience. Our **Creative North Star** is **"The Precision Curator."**
 
-We move beyond the "generic SaaS" look by embracing a layout strategy inspired by modern macOS interfaces and high-end editorial print. The aesthetic is defined by extreme clarity, "breathing" whitespace, and intentional depth. Instead of traditional grids that feel boxed in, we use asymmetrical groupings and overlapping "glass" layers to create a sense of software that is both powerful and light. 
+We move beyond the "generic SaaS" look by embracing a layout strategy inspired by modern macOS interfaces and high-end editorial print. The aesthetic is defined by extreme clarity, "breathing" whitespace, and intentional depth. Instead of traditional grids that feel boxed in, we use asymmetrical groupings and overlapping "glass" layers to create a sense of software that is both powerful and light.
 
 The goal is a "Native+" feel—respecting the logic of macOS while elevating it through sophisticated tonal layering and superior typographic hierarchy.
 
@@ -24,7 +24,7 @@ Treat the UI as a physical stack of semi-transparent materials. Use the `surface
 *   **Persistent UI Elements:** `surface-container-high` (#e2e7ff) for toolbars or navigation overlays.
 
 ### The "Glass & Gradient" Rule
-To achieve the macOS "Native+" aesthetic, use Glassmorphism for floating elements (e.g., Modals, Tooltips). Apply `surface-variant` with a `backdrop-blur` of 20px and 60% opacity. 
+To achieve the macOS "Native+" aesthetic, use Glassmorphism for floating elements (e.g., Modals, Tooltips). Apply `surface-variant` with a `backdrop-blur` of 24px and 40% opacity.
 *   **Signature Textures:** For primary CTAs, do not use flat fills. Apply a subtle linear gradient from `primary` (#0058be) to `primary_container` (#2170e4) at a 135° angle to add "visual soul" and professional depth.
 
 ---
@@ -52,7 +52,7 @@ Shadows should be rare and invisible. When a floating state is required (e.g., a
 
 ### The "Ghost Border" Fallback
 If an element lacks contrast against its background (common in Accessibility edge cases), use a **Ghost Border**:
-*   **Token:** `outline_variant` (#c2c6d6) at 15% opacity. 
+*   **Token:** `outline_variant` (#c2c6d6) at 15% opacity.
 *   **Constraint:** 100% opaque borders are strictly forbidden.
 
 ---

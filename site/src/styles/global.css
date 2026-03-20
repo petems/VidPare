@@ -15,7 +15,7 @@ body {
   min-height: 100%;
   color: #131b2e;
   background: #faf8ff;
-  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  font-family: 'Inter Variable', Inter, system-ui, sans-serif;
 }
 
 h1,
@@ -23,7 +23,7 @@ h2,
 h3,
 h4,
 .brand {
-  font-family: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
+  font-family: 'Manrope Variable', Manrope, system-ui, sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -33,7 +33,7 @@ a {
 
 /* Primary gradient for CTAs (design system: 135deg primary to primary-container) */
 .primary-gradient {
-  background: linear-gradient(135deg, #0058be 0%, #2170e4 100%);
+  background: linear-gradient(135deg, theme('colors.primary') 0%, theme('colors.primary-container') 100%);
 }
 
 /* Glass panel effect (design system: surface-variant 40% opacity + backdrop blur) */
