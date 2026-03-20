@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline-variant": "#c2c6d6",
+              "on-primary": "#ffffff",
+              "surface-container": "#eaedff",
+              "tertiary-container": "#b75b00",
+              "on-primary-container": "#fefcff",
+              "on-tertiary-container": "#fffbff",
+              "surface-bright": "#faf8ff",
+              "on-surface": "#131b2e",
+              "on-tertiary-fixed": "#311400",
+              "secondary": "#495e8a",
+              "surface-tint": "#005ac2",
+              "on-surface-variant": "#424754",
+              "on-background": "#131b2e",
+              "on-tertiary": "#ffffff",
+              "outline": "#727785",
+              "surface": "#faf8ff",
+              "secondary-fixed-dim": "#b1c6f9",
+              "primary-fixed": "#d8e2ff",
+              "on-secondary-container": "#405682",
+              "inverse-surface": "#283044",
+              "on-error": "#ffffff",
+              "tertiary": "#924700",
+              "surface-dim": "#d2d9f4",
+              "tertiary-fixed": "#ffdcc6",
+              "surface-container-lowest": "#ffffff",
+              "background": "#faf8ff",
+              "on-primary-fixed": "#001a42",
+              "surface-variant": "#dae2fd",
+              "primary-container": "#2170e4",
+              "inverse-primary": "#adc6ff",
+              "tertiary-fixed-dim": "#ffb786",
+              "error": "#ba1a1a",
+              "surface-container-highest": "#dae2fd",
+              "on-secondary-fixed": "#001a42",
+              "surface-container-high": "#e2e7ff",
+              "surface-container-low": "#f2f3ff",
+              "primary-fixed-dim": "#adc6ff",
+              "on-error-container": "#93000a",
+              "on-tertiary-fixed-variant": "#723600",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed-variant": "#004395",
+              "secondary-fixed": "#d8e2ff",
+              "inverse-on-surface": "#eef0ff",
+              "error-container": "#ffdad6",
+              "secondary-container": "#b6ccff",
+              "primary": "#0058be",
+              "on-secondary-fixed-variant": "#304671"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-panel {
+        background: rgba(218, 226, 253, 0.4);
+        backdrop-filter: blur(24px);
+      }
+      .primary-gradient {
+        background: linear-gradient(135deg, #0058be 0%, #2170e4 100%);
+      }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tighter text-on-surface font-headline">VidPare</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="font-headline text-sm font-medium tracking-tight text-primary" href="#">Dashboard</a>
+<a class="font-headline text-sm font-medium tracking-tight text-on-surface-variant hover:text-on-surface transition-colors" href="#">Features</a>
+<a class="font-headline text-sm font-medium tracking-tight text-on-surface-variant hover:text-on-surface transition-colors" href="#">Support</a>
+<a class="font-headline text-sm font-medium tracking-tight text-on-surface-variant hover:text-on-surface transition-colors" href="#">Pricing</a>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">Sign In</button>
+<button class="px-5 py-2.5 rounded-lg primary-gradient text-on-primary text-sm font-semibold hover:opacity-90 transition-all active:scale-95">Download App</button>
+</div>
+</div>
+</nav>
+<main class="pt-24">
+<!-- Hero Section -->
+<section class="relative px-6 py-20 md:py-32 flex flex-col items-center text-center overflow-hidden">
+<div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#eaedff_0%,transparent_50%)] opacity-60"></div>
+<div class="max-w-4xl mx-auto">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high text-primary text-xs font-bold mb-6 tracking-wider uppercase">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+                    Built for macOS
+                </div>
+<h1 class="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter text-on-surface mb-6 leading-tight">
+                    VidPare. <br/><span class="text-primary">Native macOS Video Trimmer.</span>
+</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-10 font-body leading-relaxed">
+                    Trim videos fast on macOS. No uploads. No nonsense. High-performance passthrough clipping powered by Apple's native frameworks.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
+<button class="w-full sm:w-auto px-8 py-4 rounded-xl primary-gradient text-on-primary font-bold shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">download</span>
+                        Download for macOS
+                    </button>
+<button class="w-full sm:w-auto px-8 py-4 rounded-xl bg-surface-container-highest text-primary font-bold hover:bg-surface-container-high transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">code</span>
+                        View on GitHub
+                    </button>
+</div>
+</div>
+<!-- Product Placeholder -->
+<div class="w-full max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-surface-container-low p-2">
+<div class="rounded-xl overflow-hidden aspect-video relative group">
+<img class="w-full h-full object-cover" alt="Screenshot of VidPare macOS video editor interface showing timeline" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAs21cqso1-QZkiiyBsjDAuHP89u9_RiPmYQxbWxcT8zw-zn_XlxdPtTPXlgXBkqDqBZ9CUWS2Lf6igHnvJe9ArgqkFMrA0ysO_fWpRbV9CJ7JmDLgwrPGVUihZ1Ugx76F_FiQgF8hzSTWN7xZViFQ3NIqks_F78NYPmiBNPWZ2TqDP9ODD_h0WahI8PaIqe0o6Fp7wv2SsJIBEV3uVMB2Ko-0R7GGbTjtopUPxVoA8QdL9Vgl2_GLGx0b8utAH310y50tXlgNlHKw"/>
+<div class="absolute inset-0 bg-on-surface/10 group-hover:bg-transparent transition-colors duration-500"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="glass-panel p-6 rounded-full shadow-xl">
+<span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature Cards -->
+<section class="py-24 px-6 max-w-screen-2xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Native -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl transition-all hover:-translate-y-1">
+<div class="inline-block px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-bold tracking-widest mb-4">NATIVE</div>
+<div class="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-3xl">terminal</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-3">AVFoundation Power</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                        Direct integration with Apple's media framework ensures 100% compatibility and maximum hardware acceleration on M-series chips.
+                    </p>
+</div>
+<!-- Fast -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl transition-all hover:-translate-y-1">
+<div class="inline-block px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-bold tracking-widest mb-4">FREE</div>
+<div class="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-3">Passthrough Speed</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                        Don't wait for re-encoding. VidPare trims your files instantly using passthrough technology—keeping original quality and zero export time.
+                    </p>
+</div>
+<!-- Privacy -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl transition-all hover:-translate-y-1">
+<div class="inline-block px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-bold tracking-widest mb-4">PRIVACY</div>
+<div class="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-3xl">shield_lock</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-3">Local-First Privacy</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                        Your data never leaves your machine. No servers, no tracking, and no internet connection required. Professional security by design.
+                    </p>
+</div>
+</div>
+</section>
+<!-- How It Works (Editorial Style) -->
+<section class="py-24 bg-surface-container-low">
+<div class="max-w-screen-xl mx-auto px-6">
+<div class="mb-16">
+<h2 class="font-headline text-4xl font-extrabold tracking-tight mb-4">Three steps to perfection.</h2>
+<p class="text-on-surface-variant max-w-xl">A workflow so seamless, it feels like it's part of the operating system itself.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-4 space-y-12">
+<div class="flex gap-6">
+<span class="text-5xl font-black text-primary/20 font-headline">01</span>
+<div>
+<h4 class="font-headline text-lg font-bold mb-2">Open Clip</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed">Drag and drop any video file directly into the workspace. Instant preview loading.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<span class="text-5xl font-black text-primary/20 font-headline">02</span>
+<div>
+<h4 class="font-headline text-lg font-bold mb-2">Set Trim Points</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed">Use precision frame-by-frame controls to mark your start and end with millisecond accuracy.</p>
+</div>
+</div>
+<div class="flex gap-6">
+<span class="text-5xl font-black text-primary/20 font-headline">03</span>
+<div>
+<h4 class="font-headline text-lg font-bold mb-2">Export Fast</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed">One click to save. No progress bars, just immediate results saved to your chosen destination.</p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-8">
+<div class="relative rounded-3xl overflow-hidden glass-panel p-8 shadow-inner">
+<img class="rounded-2xl shadow-lg w-full" alt="Laptop displaying professional editing software layout" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuKiZyLc_Ab_XzlRg1YU8NN3CYbFPBrPf5A3e2cdMj-zBQVPq34ObQiMI-QBixW0oLLYPpUEv5J5UP-LGNvXhDm5H_lVf82NgsgDUcb2L9bLUJF4FblAEOicR1avKSw8-LgkJAnww4fH7eGEnL1JxN37BVP5cxI3tlAQTAgohjchSUhOCpt3otgCDW2zdniOqrmH-k_NLpMgEDj7F-zl6_7Rm1j7EY5J2ug6kqFhiZ35TGPfcHfDYTBxTYQmAtBznaGFxi-qxNEek"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ Section -->
+<section class="py-32 px-6 max-w-3xl mx-auto">
+<h2 class="font-headline text-3xl font-extrabold tracking-tight text-center mb-16">Frequently Asked Questions</h2>
+<div class="space-y-4">
+<div class="bg-surface-container-lowest rounded-2xl p-6 transition-all border border-transparent hover:border-primary/10">
+<div class="flex justify-between items-center cursor-pointer group">
+<span class="font-headline font-semibold text-on-surface">Is VidPare free to use?</span>
+<span class="material-symbols-outlined text-primary">expand_more</span>
+</div>
+<div class="mt-4 text-on-surface-variant text-sm leading-relaxed">
+                        Yes, VidPare is completely free and open-source. We believe in providing essential utilities to the macOS community without hidden costs.
+                    </div>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl p-6 transition-all border border-transparent hover:border-primary/10">
+<div class="flex justify-between items-center cursor-pointer group">
+<span class="font-headline font-semibold text-on-surface">Does it support 4K and ProRES?</span>
+<span class="material-symbols-outlined text-primary">expand_more</span>
+</div>
+<div class="mt-4 text-on-surface-variant text-sm leading-relaxed">
+                        Absolutely. Since we use AVFoundation, any format that QuickTime or Final Cut Pro supports is natively supported by VidPare.
+                    </div>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl p-6 transition-all border border-transparent hover:border-primary/10">
+<div class="flex justify-between items-center cursor-pointer group">
+<span class="font-headline font-semibold text-on-surface">Why choose this over QuickTime Player?</span>
+<span class="material-symbols-outlined text-primary">expand_more</span>
+</div>
+<div class="mt-4 text-on-surface-variant text-sm leading-relaxed">
+                        VidPare provides dedicated clipping controls, better keyboard shortcuts, and a streamlined "one-task" interface that is much faster for batch processing.
+                    </div>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl p-6 transition-all border border-transparent hover:border-primary/10">
+<div class="flex justify-between items-center cursor-pointer group">
+<span class="font-headline font-semibold text-on-surface">Is there a Windows version?</span>
+<span class="material-symbols-outlined text-primary">expand_more</span>
+</div>
+<div class="mt-4 text-on-surface-variant text-sm leading-relaxed">
+                        No, VidPare is built specifically using macOS-only technologies to ensure the best possible performance and system integration.
+                    </div>
+</div>
+</div>
+</section>
+<!-- CTA Footer Section -->
+<section class="py-24 px-6 text-center">
+<div class="max-w-2xl mx-auto bg-primary-container rounded-[2rem] py-16 px-8 text-on-primary shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-12 opacity-10">
+<span class="material-symbols-outlined text-9xl">movie_edit</span>
+</div>
+<h2 class="font-headline text-3xl font-bold mb-6">Ready to trim faster?</h2>
+<p class="mb-10 text-on-primary/80 font-medium">Join thousands of creators using the most precise trimmer on macOS.</p>
+<button class="bg-on-primary text-primary px-10 py-4 rounded-xl font-bold hover:scale-105 transition-transform">Download VidPare</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full bg-surface-container-low">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 py-12 w-full mt-auto max-w-screen-2xl mx-auto">
+<div class="mb-8 md:mb-0">
+<span class="font-headline font-bold text-on-surface text-lg block mb-2">VidPare</span>
+<p class="font-body text-xs text-on-surface-variant max-w-xs">© 2024 VidPare Precision Systems. All rights reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-body text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-body text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Status</a>
+<a class="font-body text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -3,117 +3,216 @@ import MainLayout from '../layouts/MainLayout.astro';
 import { siteConfig } from '../content/site.config';
 import { faqs, featureItems } from '../content/features';
 
-const heroTitleLines = siteConfig.heroTitle.split('\n').filter((line) => line.trim().length > 0);
+const steps = [
+  {
+    num: '01',
+    title: 'Open Clip',
+    body: 'Drag and drop any video file directly into the workspace. Instant preview loading.',
+  },
+  {
+    num: '02',
+    title: 'Set Trim Points',
+    body: 'Use precision frame-by-frame controls to mark your start and end with millisecond accuracy.',
+  },
+  {
+    num: '03',
+    title: 'Export Fast',
+    body: 'One click to save. No progress bars, just immediate results saved to your chosen destination.',
+  },
+];
+
+const featureLabels: Record<string, string> = {
+  native: 'NATIVE',
+  free: 'FREE',
+  privacy: 'PRIVACY',
+  'open-source': 'OPEN SOURCE',
+};
 ---
 
 <MainLayout>
-  <main id="top">
-    <header class="site-header">
-      <nav>
-        <a href="#features">Features</a>
-        <a href="#tech">Tech</a>
-        <a href="#faq">FAQ</a>
-      </nav>
-    </header>
-
-    <section id="hero" class="hero surface reveal">
-      <h1 class="hero-brand"><a href="#top">{siteConfig.appName}</a></h1>
-      <p class="eyebrow">Native macOS video trimmer</p>
-      <h2 class="hero-title-stack">
-        {
-          heroTitleLines.map((line) => (
-            <span class="line">{line}</span>
-          ))
-        }
-      </h2>
-      <p class="lede">{siteConfig.heroSubtitle}</p>
-      <div class="cta-row">
-        <a class="btn primary" href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer">{siteConfig.cta.primaryLabel}</a>
-        <a class="btn secondary" href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer">{siteConfig.cta.secondaryLabel}</a>
+  <!-- Fixed Top Nav -->
+  <nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl">
+    <div class="flex justify-between items-center w-full px-6 py-3 max-w-screen-2xl mx-auto">
+      <div class="flex items-center gap-8">
+        <a href="#top" class="text-xl font-bold tracking-tighter text-on-surface font-headline">{siteConfig.appName}</a>
+        <div class="hidden md:flex gap-6 items-center">
+          <a class="font-headline text-sm font-medium tracking-tight text-on-surface-variant hover:text-on-surface transition-colors" href="#features">Features</a>
+          <a class="font-headline text-sm font-medium tracking-tight text-on-surface-variant hover:text-on-surface transition-colors" href="#tech">Tech</a>
+          <a class="font-headline text-sm font-medium tracking-tight text-on-surface-variant hover:text-on-surface transition-colors" href="#faq">FAQ</a>
+        </div>
       </div>
-      <p class="microcopy">Does one thing well: trim videos easily, quickly, and natively.</p>
-      <div class="hero-demo">
-        <video autoplay muted loop playsinline preload="metadata"
-               poster="/demo-poster.jpg" width="1280" height="800"
-               aria-hidden="true">
-          <source src="/demo.mp4" type="video/mp4" />
-        </video>
+      <div class="flex items-center gap-3">
+        <a href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer" class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors hidden sm:inline-block">View Source</a>
+        <a href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer" class="px-5 py-2.5 rounded-lg primary-gradient text-on-primary text-sm font-semibold hover:opacity-90 transition-all active:scale-95">Download App</a>
       </div>
-    </section>
+    </div>
+  </nav>
 
-    <section class="trust-strip centered-section" aria-label="Key guarantees">
-      {
-        siteConfig.trustItems.map((item) => (
-          <span class="pill">{item}</span>
-        ))
-      }
-    </section>
+  <main id="top" class="pt-16">
+    <!-- Hero Section -->
+    <section class="relative px-6 py-20 md:py-32 flex flex-col items-center text-center overflow-hidden reveal">
+      <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,#eaedff_0%,transparent_50%)] opacity-60"></div>
 
-    <section id="features" class="feature-grid reveal centered-section">
-      {
-        featureItems.map((feature) => (
-          <article class="card">
-            <p class="badge">{feature.badge}</p>
-            <h2>{feature.title}</h2>
-            <p>{feature.body}</p>
-          </article>
-        ))
-      }
-    </section>
+      <div class="max-w-4xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high text-primary text-xs font-bold mb-6 tracking-wider uppercase">
+          Native macOS
+        </div>
 
-    <section id="tech" class="tech-block surface reveal centered-section">
-      <h2>Not a shell over ffmpeg</h2>
-      <p>
-        VidPare is built directly on Apple frameworks: Swift, SwiftUI, AVFoundation, and VideoToolbox.
-        That gives you real macOS integration, hardware-accelerated media pipelines, and predictable behavior
-        without external binary glue.
-      </p>
-      <div class="code-chip">
-        <span>SwiftUI Shell</span>
-        <span>VideoEngine (AVFoundation)</span>
-        <span>No ffmpeg dependency</span>
+        <h1 class="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter text-on-surface mb-6 leading-tight">
+          VidPare. <br /><span class="text-primary">Native macOS Video Trimmer.</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-10 font-body leading-relaxed">
+          {siteConfig.heroSubtitle}
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
+          <a href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl primary-gradient text-on-primary font-bold hover:opacity-95 transition-all flex items-center justify-center gap-2">
+            {siteConfig.cta.primaryLabel}
+          </a>
+          <a href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer"
+             class="w-full sm:w-auto px-8 py-4 rounded-xl bg-surface-container-highest text-primary font-bold hover:bg-surface-container-high transition-all flex items-center justify-center gap-2">
+            {siteConfig.cta.secondaryLabel}
+          </a>
+        </div>
+      </div>
+
+      <!-- Demo Video -->
+      <div class="w-full max-w-5xl mx-auto rounded-2xl overflow-hidden bg-surface-container-low p-2" style="box-shadow: 0 24px 60px -12px rgba(0, 40, 120, 0.08);">
+        <div class="rounded-xl overflow-hidden aspect-video relative">
+          <video autoplay muted loop playsinline preload="metadata"
+                 poster="/demo-poster.jpg" width="1280" height="800"
+                 class="w-full h-full object-cover"
+                 aria-hidden="true">
+            <source src="/demo.mp4" type="video/mp4" />
+          </video>
+        </div>
       </div>
     </section>
 
-    <section class="workflow reveal centered-section">
-      <h2>How it works</h2>
-      <ol>
-        <li>
-          <strong>Open your clip</strong>
-          <p>Drop in MP4, MOV, or M4V directly from Finder.</p>
-        </li>
-        <li>
-          <strong>Set trim points</strong>
-          <p>Use timeline handles to choose exactly what you want to keep.</p>
-        </li>
-        <li>
-          <strong>Export fast</strong>
-          <p>Use passthrough where possible for near-instant outputs.</p>
-        </li>
-      </ol>
-    </section>
-
-    <section class="cta-banner reveal centered-section" aria-label="download">
-      <h2>Free, open source, and built for macOS creators</h2>
-      <p>Use VidPare when you want trimming done in seconds, not a heavyweight editing suite.</p>
-      <div class="cta-row">
-        <a class="btn primary" href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer">{siteConfig.cta.primaryLabel ?? "Download Latest Release"}</a>
-        <a class="btn secondary" href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer">{siteConfig.cta.secondaryLabel ?? "Star on GitHub"}</a>
+    <!-- Feature Cards -->
+    <section id="features" class="py-24 px-6 max-w-screen-2xl mx-auto reveal">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {featureItems.map((feature) => {
+          const badge = feature.badge ?? 'native';
+          return (
+          <div class="bg-surface-container-lowest p-8 rounded-2xl transition-all hover:-translate-y-1">
+            <div class="inline-block px-3 py-1 rounded-full bg-surface-container-high text-primary text-[10px] font-bold tracking-widest mb-4">
+              {featureLabels[badge]}
+            </div>
+            <div class="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                {badge === 'native' && <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />}
+                {badge === 'free' && <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />}
+                {badge === 'privacy' && <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />}
+                {badge === 'open-source' && <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />}
+              </svg>
+            </div>
+            <h3 class="font-headline text-xl font-bold mb-3">{feature.title}</h3>
+            <p class="text-on-surface-variant text-sm leading-relaxed">{feature.body}</p>
+          </div>
+        )})}
       </div>
     </section>
 
-    <section id="faq" class="faq reveal centered-section">
-      <h2>FAQ</h2>
-      {
-        faqs.map((item) => (
-          <details>
-            <summary>{item.question}</summary>
-            <p>{item.answer}</p>
+    <!-- How It Works (Editorial Style) -->
+    <section id="tech" class="py-24 bg-surface-container-low reveal">
+      <div class="max-w-screen-xl mx-auto px-6">
+        <div class="mb-16">
+          <h2 class="font-headline text-4xl font-extrabold tracking-tight mb-4">Three steps to perfection.</h2>
+          <p class="text-on-surface-variant max-w-xl">A workflow so seamless, it feels like it&apos;s part of the operating system itself.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div class="lg:col-span-4 space-y-12">
+            {steps.map((step) => (
+              <div class="flex gap-6">
+                <span class="text-5xl font-black text-primary/20 font-headline">{step.num}</span>
+                <div>
+                  <h4 class="font-headline text-lg font-bold mb-2">{step.title}</h4>
+                  <p class="text-on-surface-variant text-sm leading-relaxed">{step.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="lg:col-span-8">
+            <div class="relative rounded-3xl overflow-hidden glass-panel p-4 md:p-8">
+              <video autoplay muted loop playsinline preload="metadata"
+                     poster="/demo-poster.jpg" width="1280" height="800"
+                     class="rounded-2xl w-full"
+                     style="box-shadow: 0 8px 40px -8px rgba(0, 40, 120, 0.12);"
+                     aria-hidden="true">
+                <source src="/demo.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech Block -->
+    <section class="py-24 px-6 max-w-screen-xl mx-auto reveal">
+      <div class="max-w-2xl">
+        <h2 class="font-headline text-3xl font-extrabold tracking-tight mb-4">Not a shell over ffmpeg</h2>
+        <p class="text-on-surface-variant leading-relaxed mb-6">
+          VidPare is built directly on Apple frameworks: Swift, SwiftUI, AVFoundation, and VideoToolbox.
+          That gives you real macOS integration, hardware-accelerated media pipelines, and predictable behavior
+          without external binary glue.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <span class="rounded-full bg-surface-container-high text-on-surface-variant px-4 py-1.5 text-sm font-medium">SwiftUI Shell</span>
+          <span class="rounded-full bg-surface-container-high text-on-surface-variant px-4 py-1.5 text-sm font-medium">VideoEngine (AVFoundation)</span>
+          <span class="rounded-full bg-surface-container-high text-on-surface-variant px-4 py-1.5 text-sm font-medium">No ffmpeg dependency</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-32 px-6 max-w-3xl mx-auto reveal">
+      <h2 class="font-headline text-3xl font-extrabold tracking-tight text-center mb-16">Frequently Asked Questions</h2>
+      <div class="space-y-4">
+        {faqs.map((item) => (
+          <details class="bg-surface-container-lowest rounded-2xl p-6 transition-all group">
+            <summary class="flex justify-between items-center cursor-pointer font-headline font-semibold text-on-surface list-none [&::-webkit-details-marker]:hidden">
+              {item.question}
+              <svg class="w-5 h-5 text-primary transition-transform group-open:rotate-180 shrink-0 ml-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </summary>
+            <p class="mt-4 text-on-surface-variant text-sm leading-relaxed">{item.answer}</p>
           </details>
-        ))
-      }
+        ))}
+      </div>
+    </section>
+
+    <!-- CTA Footer Section -->
+    <section class="py-24 px-6 text-center reveal">
+      <div class="max-w-2xl mx-auto bg-primary-container rounded-[2rem] py-16 px-8 text-on-primary relative overflow-hidden" style="box-shadow: 0 24px 60px -12px rgba(0, 88, 190, 0.25);">
+        <h2 class="font-headline text-3xl font-bold mb-6">Ready to trim faster?</h2>
+        <p class="mb-10 text-on-primary/80 font-medium">Join creators using the most precise trimmer on macOS.</p>
+        <a href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer"
+           class="inline-block bg-on-primary text-primary px-10 py-4 rounded-xl font-bold hover:scale-105 transition-transform">
+          Download VidPare
+        </a>
+      </div>
     </section>
   </main>
+
+  <!-- Footer -->
+  <footer class="w-full bg-surface-container-low">
+    <div class="flex flex-col md:flex-row justify-between items-center px-8 py-12 w-full mt-auto max-w-screen-2xl mx-auto">
+      <div class="mb-8 md:mb-0">
+        <span class="font-headline font-bold text-on-surface text-lg block mb-2">{siteConfig.appName}</span>
+        <p class="text-xs text-on-surface-variant max-w-xs">&copy; {new Date().getFullYear()} {siteConfig.appName}. All rights reserved.</p>
+      </div>
+      <div class="flex gap-8">
+        <a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href={siteConfig.cta.sourceUrl} target="_blank" rel="noreferrer">GitHub</a>
+        <a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href={siteConfig.cta.downloadUrl} target="_blank" rel="noreferrer">Releases</a>
+      </div>
+    </div>
+  </footer>
 
   <script src="../scripts/main.ts"></script>
 </MainLayout>
